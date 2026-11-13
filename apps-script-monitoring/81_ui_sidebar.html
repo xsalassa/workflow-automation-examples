@@ -1,0 +1,361 @@
+<!doctype html>
+<html>
+  <head>
+    <base target="_blank">
+    <style>
+      body { font: 13px Arial, sans-serif; margin: 0; color: #202124; background: #f8f9fa; }
+      header { background: #174ea6; color: white; padding: 16px; }
+      main { padding: 14px; }
+      .card { background: white; border: 1px solid #dadce0; border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+      .label { color: #5f6368; font-size: 11px; margin-bottom: 4px; text-transform: uppercase; }
+      .value { overflow-wrap: anywhere; white-space: pre-line; }
+      .overview { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .workspace { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(360px, .85fr); gap: 12px; align-items: start; }
+      .action-section { margin-top: 14px; }
+      .action-section:first-child { margin-top: 0; }
+      .action-title { color: #3c4043; font-size: 12px; font-weight: bold; margin-bottom: 7px; }
+      .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      .action-card { border: 1px solid #e4e7eb; border-radius: 7px; padding: 8px; background: #fff; }
+      .action-card button { width: 100%; }
+      .action-help { color: #5f6368; font-size: 11px; line-height: 1.35; margin: 6px 1px 0; }
+      button { background: #1a73e8; border: 0; border-radius: 4px; color: white; cursor: pointer; padding: 9px 8px; }
+      button.secondary { background: #5f6368; }
+      button:disabled { opacity: .55; cursor: wait; }
+      #status { max-height: 230px; overflow: auto; }
+      #summary { max-height: 470px; overflow: auto; }
+      .summary-options { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+      .summary-option { background: #eef3fc; color: #174ea6; padding: 7px 10px; }
+      .summary-option.active { background: #174ea6; color: white; }
+      .summary-empty { color: #5f6368; padding: 10px 0 2px; }
+      .summary-time { font-weight: bold; color: #174ea6; margin-top: 10px; }
+      .summary-block { background: #f8f9fa; border-radius: 4px; margin-top: 6px; padding: 8px; white-space: pre-wrap; }
+      .copy-summary { background: #188038; margin-top: 6px; width: 100%; }
+      .pic-meta { color: #5f6368; font-size: 11px; margin-top: 5px; }
+      .result-head { align-items: center; display: flex; gap: 8px; margin-bottom: 8px; }
+      .result-badge { border-radius: 999px; color: white; font-size: 11px; font-weight: bold; padding: 4px 8px; }
+      .result-badge.success { background: #188038; }
+      .result-badge.error { background: #d93025; }
+      .result-title { font-weight: bold; overflow-wrap: anywhere; }
+      .result-duration { color: #5f6368; font-size: 11px; margin-left: auto; }
+      .result-message { background: #f8f9fa; border-radius: 5px; line-height: 1.45; padding: 9px; white-space: pre-wrap; }
+      .result-table { border-collapse: collapse; margin-top: 8px; width: 100%; }
+      .result-table td { border-top: 1px solid #eee; padding: 6px 3px; vertical-align: top; }
+      .result-table td:first-child { color: #5f6368; padding-right: 8px; width: 42%; }
+      .result-table td:last-child { overflow-wrap: anywhere; white-space: pre-wrap; }
+      a { color: #1a73e8; }
+      @media (max-width: 760px) {
+        .workspace, .overview { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <header><strong>EXAMPLE Monitoring Control Panel</strong></header>
+    <main>
+      <div class="overview">
+        <section class="card"><div class="label">Daily file</div><div id="dailyFile" class="value">Loading...</div></section>
+        <section class="card"><div class="label">PIC Hari Ini</div><div id="pic" class="value">Loading...</div></section>
+      </div>
+      <div class="workspace">
+        <section class="card"><div class="label">Daily Summary</div><div id="summary">Loading...</div></section>
+        <div>
+          <section class="card">
+            <div class="label">Aksi PIC</div>
+            <div class="action-section">
+              <div class="action-title">Monitoring manual</div>
+              <div class="action-grid">
+                <div class="action-card"><button onclick="runAction('runDcp')">Run DCP Now</button><p class="action-help">Jalankan ulang pengecekan DCP saat hasil otomatis perlu diperbarui.</p></div>
+                <div class="action-card"><button onclick="runAction('runFileStatus')">Run File Status</button><p class="action-help">Perbarui status kelengkapan file pada daily monitoring.</p></div>
+                <div class="action-card"><button onclick="runAction('runLooker')">Run Looker</button><p class="action-help">Jalankan pengecekan Looker secara manual bila diperlukan.</p></div>
+              </div>
+            </div>
+            <div class="action-section">
+              <div class="action-title">Checkpoint Airflow hari ini</div>
+              <div class="action-grid">
+                <div class="action-card" data-airflow-window="09:00"><button onclick="runAction('runAirflow0900')">Airflow 09:00</button><p class="action-help">Isi checkpoint monitoring pagi.</p></div>
+                <div class="action-card" data-airflow-window="11:00"><button onclick="runAction('runAirflow1100')">Airflow 11:00</button><p class="action-help">Isi checkpoint menjelang siang.</p></div>
+                <div class="action-card" data-airflow-window="13:30"><button onclick="runAction('runAirflow1330')">Airflow 13:30</button><p class="action-help">Isi checkpoint siang untuk non-working day.</p></div>
+                <div class="action-card" data-airflow-window="14:00"><button onclick="runAction('runAirflow1400')">Airflow 14:00</button><p class="action-help">Isi checkpoint siang pada weekday.</p></div>
+                <div class="action-card" data-airflow-window="17:00"><button onclick="runAction('runAirflow1700')">Airflow 17:00</button><p class="action-help">Isi checkpoint monitoring terakhir hari ini.</p></div>
+              </div>
+            </div>
+            <div class="action-section">
+              <div class="action-title">Administrasi - gunakan hanya saat diperlukan</div>
+              <div class="action-grid">
+                <div class="action-card"><button class="secondary" onclick="runAction('createDailyFile')">Create Daily</button><p class="action-help">Buat daily file jika proses otomatis gagal atau file belum ada.</p></div>
+                <div class="action-card"><button class="secondary" onclick="runAction('refreshRuntime')">Refresh Runtime</button><p class="action-help">Hubungkan ulang panel ke daily file hari ini.</p></div>
+                <div class="action-card"><button class="secondary" onclick="runAction('generateSchedule')">Generate Schedule</button><p class="action-help">Buat ulang jadwal setelah perubahan PIC atau Holiday.</p></div>
+                <div class="action-card"><button class="secondary" onclick="runAction('validateTemplate')">Validate Template</button><p class="action-help">Periksa struktur template sebelum operasional.</p></div>
+                <div class="action-card"><button class="secondary" onclick="runAction('setupTriggers')">Setup Triggers</button><p class="action-help">Khusus admin untuk memasang ulang trigger otomatis.</p></div>
+              </div>
+            </div>
+          </section>
+          <section class="card"><div class="label">Hasil aksi terakhir</div><div id="status">Ready.</div></section>
+        </div>
+      </div>
+    </main>
+    <script>
+      function loadState() {
+        google.script.run
+          .withSuccessHandler(renderState)
+          .withFailureHandler(renderFailure)
+          .getMonitoringUiState();
+      }
+
+      function renderState(state) {
+        const target = document.getElementById("dailyFile");
+        const picTarget = document.getElementById("pic");
+        picTarget.textContent =
+          "Monitoring 1: " + (state.monitoring1 || "-") + "\n" +
+          "Monitoring 2: " + (state.monitoring2 || "-");
+        const picMeta = document.createElement("div");
+        picMeta.className = "pic-meta";
+        const contextParts = [
+          state.dayType || "",
+          state.monitoringType || "",
+          state.assignmentSourceDate
+            ? "Sumber PIC " + state.assignmentSourceDate
+            : ""
+        ].filter(Boolean);
+        picMeta.textContent = contextParts.length
+          ? contextParts.join(" · ")
+          : (state.picScheduleDate
+              ? (state.picSource || "Schedule") + " · " + state.picScheduleDate
+              : "Jadwal hari ini belum ditemukan.");
+        picTarget.appendChild(picMeta);
+        renderAirflowWindows(state.airflowWindows || []);
+        renderSummary(state.dailySummary, state.dailySummaryError);
+        if (!state.dailyFileId) {
+          target.textContent = "Belum ada runtime daily file.";
+          return;
+        }
+        target.innerHTML = state.dailyFileUrl
+          ? '<a href="' + escapeHtml(state.dailyFileUrl) + '">' +
+            escapeHtml(state.dailyFileName || state.dailyFileId) + '</a><br>' +
+            escapeHtml(state.dailyFileDate || "")
+          : escapeHtml(state.dailyFileName || state.dailyFileId);
+      }
+
+      function renderAirflowWindows(activeWindows) {
+        document.querySelectorAll("[data-airflow-window]").forEach(function (button) {
+          button.hidden = activeWindows.indexOf(
+            button.getAttribute("data-airflow-window")
+          ) === -1;
+        });
+      }
+
+      function renderSummary(summary, error) {
+        const target = document.getElementById("summary");
+        target.replaceChildren();
+        if (error) {
+          target.textContent = "Error: " + error;
+          return;
+        }
+        if (!summary || !summary.length) {
+          target.textContent = "Summary daily file belum tersedia.";
+          return;
+        }
+        const options = document.createElement("div");
+        options.className = "summary-options";
+        const detail = document.createElement("div");
+        const hint = document.createElement("div");
+        hint.className = "summary-empty";
+        hint.textContent = "Pilih waktu laporan untuk melihat summary.";
+        detail.appendChild(hint);
+        const now = new Date();
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        let firstOption = null;
+        let latestDueOption = null;
+        summary.forEach(function (group, index) {
+          const option = document.createElement("button");
+          option.className = "summary-option";
+          option.textContent = group.time || ("Pilihan " + (index + 1));
+          option.onclick = function () {
+            options.querySelectorAll("button").forEach(function (button) {
+              button.classList.remove("active");
+            });
+            option.classList.add("active");
+            renderSelectedSummary(group, detail);
+          };
+          options.appendChild(option);
+          if (!firstOption) firstOption = option;
+          const timeMatch = String(group.time || "").match(/(\d{1,2}):(\d{2})/);
+          if (timeMatch) {
+            const checkpointMinutes =
+              Number(timeMatch[1]) * 60 + Number(timeMatch[2]);
+            if (checkpointMinutes <= currentMinutes) latestDueOption = option;
+          }
+        });
+        target.appendChild(options);
+        target.appendChild(detail);
+        if (latestDueOption || firstOption) {
+          (latestDueOption || firstOption).click();
+        }
+      }
+
+      function renderSelectedSummary(group, target) {
+        target.replaceChildren();
+        const time = document.createElement("div");
+        time.className = "summary-time";
+        time.textContent = [group.date, group.time].filter(Boolean).join(" · ") ||
+          ("Pilihan " + group.column);
+        target.appendChild(time);
+        (group.blocks || []).forEach(function (block) {
+          const content = document.createElement("div");
+          content.className = "summary-block";
+          content.textContent = block.text;
+          target.appendChild(content);
+        });
+        const copyText = (group.blocks || [])
+          .map(function (block) { return block.text; })
+          .filter(Boolean)
+          .join("\n\n");
+        if (copyText) {
+          const copyButton = document.createElement("button");
+          copyButton.className = "copy-summary";
+          copyButton.textContent = "Copy Summary";
+          copyButton.onclick = function () {
+            copySummaryText(copyText, copyButton);
+          };
+          target.appendChild(copyButton);
+        }
+      }
+
+      function copySummaryText(value, button) {
+        navigator.clipboard.writeText(value).then(function () {
+          const original = button.textContent;
+          button.textContent = "Copied";
+          setTimeout(function () {
+            button.textContent = original;
+          }, 1200);
+        }).catch(function () {
+          const input = document.createElement("textarea");
+          input.value = value;
+          document.body.appendChild(input);
+          input.select();
+          document.execCommand("copy");
+          input.remove();
+          button.textContent = "Copied";
+        });
+      }
+
+      function runAction(action) {
+        setBusy(true);
+        document.getElementById("status").textContent = "Running " + action + "...";
+        google.script.run
+          .withSuccessHandler(function (response) {
+            setBusy(false);
+            renderActionResult(response);
+            loadState();
+          })
+          .withFailureHandler(function (error) {
+            setBusy(false);
+            renderFailure(error);
+          })
+          .runMonitoringUiAction(action);
+      }
+
+      function renderActionResult(response) {
+        const target = document.getElementById("status");
+        target.replaceChildren();
+        const head = document.createElement("div");
+        head.className = "result-head";
+        const badge = document.createElement("span");
+        badge.className = "result-badge " + (response.ok ? "success" : "error");
+        badge.textContent = response.ok ? "SUCCESS" : "ERROR";
+        const title = document.createElement("span");
+        title.className = "result-title";
+        title.textContent = humanizeKey(response.action || "Action");
+        const duration = document.createElement("span");
+        duration.className = "result-duration";
+        duration.textContent = (response.durationSeconds || 0) + " detik";
+        head.appendChild(badge);
+        head.appendChild(title);
+        head.appendChild(duration);
+        target.appendChild(head);
+        if (!response.ok) {
+          const message = document.createElement("div");
+          message.className = "result-message";
+          message.textContent = response.error || "Terjadi error yang tidak diketahui.";
+          target.appendChild(message);
+          return;
+        }
+        if (response.result === null || response.result === undefined) {
+          const message = document.createElement("div");
+          message.className = "result-message";
+          message.textContent = "Proses selesai tanpa detail tambahan.";
+          target.appendChild(message);
+          return;
+        }
+        renderResultDetails(response.result, target);
+      }
+
+      function renderResultDetails(result, target) {
+        if (typeof result !== "object") {
+          const message = document.createElement("div");
+          message.className = "result-message";
+          message.textContent = String(result);
+          target.appendChild(message);
+          return;
+        }
+        const table = document.createElement("table");
+        table.className = "result-table";
+        Object.keys(result).forEach(function (key) {
+          const row = table.insertRow();
+          const label = row.insertCell();
+          const value = row.insertCell();
+          label.textContent = humanizeKey(key);
+          value.textContent = formatResultValue(result[key]);
+        });
+        target.appendChild(table);
+      }
+
+      function formatResultValue(value) {
+        if (value === null || value === undefined || value === "") return "-";
+        if (Array.isArray(value)) {
+          return value.map(function (item) {
+            return typeof item === "object" ? formatObjectInline(item) : "• " + item;
+          }).join("\n");
+        }
+        if (typeof value === "object") return formatObjectInline(value);
+        if (typeof value === "boolean") return value ? "Ya" : "Tidak";
+        return String(value);
+      }
+
+      function formatObjectInline(value) {
+        return Object.keys(value).map(function (key) {
+          return humanizeKey(key) + ": " + formatResultValue(value[key]);
+        }).join("\n");
+      }
+
+      function humanizeKey(value) {
+        return String(value || "")
+          .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+          .replace(/[_-]+/g, " ")
+          .replace(/^./, function (letter) { return letter.toUpperCase(); });
+      }
+
+      function setBusy(busy) {
+        document.querySelectorAll("button").forEach(function (button) {
+          button.disabled = busy;
+        });
+      }
+
+      function renderFailure(error) {
+        renderActionResult({
+          ok: false,
+          action: "Request",
+          error: error.message || error,
+          durationSeconds: 0
+        });
+      }
+
+      function escapeHtml(value) {
+        const div = document.createElement("div");
+        div.textContent = String(value || "");
+        return div.innerHTML;
+      }
+
+      loadState();
+    </script>
+  </body>
+</html>

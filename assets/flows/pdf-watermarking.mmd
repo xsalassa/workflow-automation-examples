@@ -1,0 +1,11 @@
+flowchart LR
+    S0["Choose local inputs: PDF and neutral mark"]
+    S1["Validate inputs: geometry and output path"]
+    S2["Select the pages: first page or all pages"]
+    S3["Insert the image: PyMuPDF overlay"]
+    S4["Publish the output: separate PDF file"]
+    S0 --> S1 --> S2 --> S3 --> S4
+    B0["Invalid input: exit without publishing"]
+    B1["Existing output: explicit overwrite required"]
+    S1 -. condition .-> B0
+    S1 -. output collision .-> B1

@@ -1,0 +1,134 @@
+{
+  "airflow": {
+    "source": "explicit",
+    "url": "https://raw.githubusercontent.com/apache/airflow/main/airflow-core/src/airflow/ui/public/pin_100.png",
+    "file": "airflow.png",
+    "bytes": 7501
+  },
+  "alert": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/triangle-alert.svg",
+    "file": "alert.svg",
+    "bytes": 427
+  },
+  "appscript": {
+    "source": "explicit",
+    "url": "https://www.gstatic.com/images/branding/product/2x/apps_script_48dp.png",
+    "file": "appscript.png",
+    "bytes": 3101
+  },
+  "archive": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/archive.svg",
+    "file": "archive.svg",
+    "bytes": 415
+  },
+  "automate": {
+    "source": "explicit",
+    "url": "https://raw.githubusercontent.com/microsoft/PowerBI-Icons/main/SVG/Power-Automate-Colored.svg",
+    "file": "automate.svg",
+    "bytes": 2534
+  },
+  "bigquery": {
+    "source": "gcp",
+    "url": "https://services.google.com/fh/files/misc/core-products-icons.zip#Unique Icons/BigQuery/SVG/BigQuery-512-color.svg",
+    "file": "bigquery.svg",
+    "bytes": 1600
+  },
+  "branch": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/git-branch.svg",
+    "file": "branch.svg",
+    "bytes": 391
+  },
+  "check": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/list-checks.svg",
+    "file": "check.svg",
+    "bytes": 415
+  },
+  "clock": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/clock.svg",
+    "file": "clock.svg",
+    "bytes": 344
+  },
+  "cloudrun": {
+    "source": "gcp",
+    "url": "https://services.google.com/fh/files/misc/core-products-icons.zip#Unique Icons/Cloud Run/SVG/CloudRun-512-color-rgb.svg",
+    "file": "cloudrun.svg",
+    "bytes": 1415
+  },
+  "drive": {
+    "source": "svgl",
+    "url": "https://svgl.app/library/drive.svg",
+    "file": "drive.svg",
+    "bytes": 734
+  },
+  "excel": {
+    "source": "svgl",
+    "url": "https://svgl.app/library/microsoft-excel.svg",
+    "file": "excel.svg",
+    "bytes": 5282
+  },
+  "file": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/file-text.svg",
+    "file": "file.svg",
+    "bytes": 521
+  },
+  "mail": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/mail.svg",
+    "file": "mail.svg",
+    "bytes": 388
+  },
+  "onedrive": {
+    "source": "svgl",
+    "url": "https://svgl.app/library/microsoft-onedrive.svg",
+    "file": "onedrive.svg",
+    "bytes": 5529
+  },
+  "outlook": {
+    "source": "svgl",
+    "url": "https://svgl.app/library/microsoft-outlook.svg",
+    "file": "outlook.svg",
+    "bytes": 8541
+  },
+  "pubsub": {
+    "source": "gcp",
+    "url": "https://services.google.com/fh/files/misc/category-icons.zip#Category Icons/Data Analytics/SVG/DataAnalytics-512-color.svg",
+    "file": "pubsub.svg",
+    "bytes": 2711
+  },
+  "python": {
+    "source": "svgl",
+    "url": "https://svgl.app/library/python.svg",
+    "file": "python.svg",
+    "bytes": 1126
+  },
+  "sheets": {
+    "source": "svgl",
+    "url": "https://svgl.app/library/google-sheets.svg",
+    "file": "sheets.svg",
+    "bytes": 5073
+  },
+  "sql": {
+    "source": "svgl",
+    "url": "https://svgl.app/library/sql-server.svg",
+    "file": "sql.svg",
+    "bytes": 4384
+  },
+  "storage": {
+    "source": "gcp",
+    "url": "https://services.google.com/fh/files/misc/core-products-icons.zip#Unique Icons/Cloud Storage/SVG/Cloud_Storage-512-color.svg",
+    "file": "storage.svg",
+    "bytes": 1398
+  },
+  "teams": {
+    "source": "svgl",
+    "url": "https://svgl.app/library/microsoft-teams.svg",
+    "file": "teams.svg",
+    "bytes": 4240
+  }
+}

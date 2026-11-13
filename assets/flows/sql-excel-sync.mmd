@@ -1,0 +1,11 @@
+flowchart LR
+    S0["Source item changes: SQL modified-item trigger"]
+    S1["Read source records: SQL and Power Query"]
+    S2["Compare rows: Excel reads and filters"]
+    S3["Update matches: branch-specific keys"]
+    S4["Build notifications: tables and email"]
+    S0 --> S1 --> S2 --> S3 --> S4
+    B0["Group summaries: area and region selections"]
+    B1["Adaptation needed: queries and keys are stubs"]
+    S1 -. grouping .-> B0
+    S2 -. source note .-> B1

@@ -1,0 +1,1487 @@
+{
+  "name": "RESOURCE_ID_019",
+  "id": "/providers/Microsoft.Flow/flows/RESOURCE_ID_019",
+  "type": "Microsoft.Flow/flows",
+  "properties": {
+    "apiId": "/providers/Microsoft.PowerApps/apis/shared_logicflows",
+    "displayName": "DISPLAY_NAME_002",
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        }
+      },
+      "triggers": {
+        "ACTION_263": {
+          "recurrence": {
+            "frequency": "Minute",
+            "interval": 1
+          },
+          "evaluatedRecurrence": {
+            "frequency": "Minute",
+            "interval": 1
+          },
+          "splitOn": "@triggerOutputs()?['body/value']",
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sql",
+              "connectionName": "CONNECTION_NAME_013",
+              "operationId": "GetOnUpdatedItems_V2"
+            },
+            "parameters": {
+              "server": "SQL_SERVER_001",
+              "database": "DATABASE_NAME_001",
+              "table": "TABLE_ID_002"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        }
+      },
+      "actions": {
+        "ACTION_212": {
+          "runAfter": {
+            "ACTION_054": [
+              "Succeeded"
+            ]
+          },
+          "type": "Select",
+          "inputs": {
+            "from": "@outputs('ACTION_235')?['body/value']",
+            "select": {
+              "Province": "@item()?['PROVINCE_NAME']",
+              "City": "@item()?['CITY_NAME']",
+              "Area Main Dealer": "@item()?['AREA_MDLR.AREA_MDLR_NAME']",
+              "@{addToTime(utcNow(),-3,'month','MMM')}": "@item()?['Month3']",
+              "@{addToTime(utcNow(),-2,'month','MMM')}": "@item()?['Month2']",
+              "@{addToTime(utcNow(),-1,'month','MMM')}": "@item()?['Month1']",
+              "Status": "@item()?['Status']"
+            }
+          }
+        },
+        "ACTION_057": {
+          "runAfter": {
+            "ACTION_212": [
+              "Succeeded"
+            ]
+          },
+          "type": "Table",
+          "inputs": {
+            "from": "@body('ACTION_212')",
+            "format": "HTML"
+          }
+        },
+        "ACTION_235": {
+          "runAfter": {},
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sql",
+              "connectionName": "CONNECTION_NAME_013",
+              "operationId": "SqlExecutePassThroughPowerQuery"
+            },
+            "parameters": {
+              "query/query": "let Source = Sql.Database(\"SQL_SERVER\", \"DATABASE_NAME\") in Source"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "ACTION_077": {
+          "runAfter": {
+            "ACTION_235": [
+              "Succeeded"
+            ]
+          },
+          "type": "Expression",
+          "kind": "CurrentTime",
+          "inputs": {}
+        },
+        "ACTION_054": {
+          "runAfter": {
+            "ACTION_077": [
+              "Succeeded"
+            ]
+          },
+          "type": "Expression",
+          "kind": "ConvertTimeZone",
+          "inputs": {
+            "baseTime": "@body('ACTION_077')",
+            "formatString": "g",
+            "sourceTimeZone": "UTC",
+            "destinationTimeZone": "SE Asia Standard Time"
+          }
+        },
+        "ACTION_151": {
+          "runAfter": {
+            "ACTION_057": [
+              "Succeeded"
+            ]
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+              "connectionName": "CONNECTION_NAME_014",
+              "operationId": "GetItems"
+            },
+            "parameters": {
+              "source": "SOURCE_ID_003",
+              "drive": "DRIVE_ID_002",
+              "file": "FILE_ID_002",
+              "table": "TABLE_ID_003"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "operationOptions": "DisableAsyncPattern",
+          "runtimeConfiguration": {
+            "paginationPolicy": {
+              "minimumItemCount": 5000
+            }
+          }
+        },
+        "ACTION_085": {
+          "runAfter": {
+            "ACTION_151": [
+              "Succeeded"
+            ]
+          },
+          "type": "Query",
+          "inputs": {
+            "from": "@outputs('ACTION_151')?['body/value']",
+            "where": "@contains(item()?['Validate'], 'Not Yet')"
+          }
+        },
+        "ACTION_101": {
+          "runAfter": {
+            "ACTION_085": [
+              "Succeeded"
+            ]
+          },
+          "type": "Query",
+          "inputs": {
+            "from": "@outputs('ACTION_235')?['body/value']",
+            "where": "@contains(item()?['Validate'], 'Done')"
+          }
+        },
+        "ACTION_131": {
+          "runAfter": {
+            "ACTION_101": [
+              "Succeeded"
+            ]
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "Data",
+                "type": "array"
+              }
+            ]
+          }
+        },
+        "ACTION_022": {
+          "foreach": "@body('ACTION_085')",
+          "actions": {
+            "ACTION_109": {
+              "runAfter": {},
+              "type": "Query",
+              "inputs": {
+                "from": "@body('ACTION_101')",
+                "where": "@equals(item()?['CITY_NAME'], items('ACTION_022')?['City'])"
+              }
+            },
+            "ACTION_048": {
+              "runAfter": {
+                "ACTION_109": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Compose",
+              "inputs": {
+                "Province": "@{items('ACTION_022')?['Province']}",
+                "City": "@{items('ACTION_022')?['City']}",
+                "Area Main Dealer": "@{first(body('ACTION_109'))?['AREA_MDLR.AREA_MDLR_NAME']}",
+                "Month3": "@{first(body('ACTION_109'))?['Month3']}",
+                "Month2": "@{first(body('ACTION_109'))?['Month2']}",
+                "Month1": "@{first(body('ACTION_109'))?['Month1']}",
+                "Status": "@{first(body('ACTION_109'))?['Status']}",
+                "Validate": "@{first(body('ACTION_109'))?['Validate']}",
+                "Validate_Server": "@{first(body('ACTION_109'))?['Validate']}",
+                "Last Update": "@{body('ACTION_054')}"
+              }
+            },
+            "ACTION_015": {
+              "runAfter": {
+                "ACTION_048": [
+                  "Succeeded"
+                ]
+              },
+              "type": "AppendToArrayVariable",
+              "inputs": {
+                "name": "Data",
+                "value": "@outputs('ACTION_048')"
+              }
+            }
+          },
+          "runAfter": {
+            "ACTION_078": [
+              "Succeeded"
+            ]
+          },
+          "type": "Foreach"
+        },
+        "ACTION_163": {
+          "runAfter": {
+            "ACTION_022": [
+              "Succeeded"
+            ]
+          },
+          "type": "ParseJson",
+          "inputs": {
+            "content": "@variables('Data')",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "Province": {
+                    "type": "string"
+                  },
+                  "City": {
+                    "type": "string"
+                  },
+                  "Area Main Dealer": {
+                    "type": "string"
+                  },
+                  "Month3": {
+                    "type": "string"
+                  },
+                  "Month2": {
+                    "type": "string"
+                  },
+                  "Month1": {
+                    "type": "string"
+                  },
+                  "Status": {
+                    "type": "string"
+                  },
+                  "Validate": {
+                    "type": "string"
+                  },
+                  "Validate_Server": {
+                    "type": "string"
+                  },
+                  "Last Update": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "Province",
+                  "City",
+                  "Area Main Dealer",
+                  "Month3",
+                  "Month2",
+                  "Month1",
+                  "Status",
+                  "Validate",
+                  "Validate_Server",
+                  "Last Update"
+                ]
+              }
+            }
+          }
+        },
+        "ACTION_025": {
+          "foreach": "@body('ACTION_163')",
+          "actions": {
+            "ACTION_050": {
+              "actions": {
+                "ACTION_250": {
+                  "runAfter": {},
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+                      "connectionName": "CONNECTION_NAME_014",
+                      "operationId": "PatchItem"
+                    },
+                    "parameters": {
+                      "source": "SOURCE_ID_004",
+                      "drive": "DRIVE_ID_002",
+                      "file": "FILE_ID_002",
+                      "table": "TABLE_ID_003",
+                      "idColumn": "City",
+                      "id": "@items('ACTION_025')['City']",
+                      "item/Province": "@items('ACTION_025')['Province']",
+                      "item/City": "@items('ACTION_025')['City']",
+                      "item/Area Main Dealer": "@items('ACTION_025')['Area Main Dealer']",
+                      "item/Month3": "@items('ACTION_025')['Month3']",
+                      "item/Month2": "@items('ACTION_025')['Month2']",
+                      "item/Month1": "@items('ACTION_025')['Month1']",
+                      "item/Status": "@items('ACTION_025')['Status']",
+                      "item/Validate": "@items('ACTION_025')['Validate']",
+                      "item/Last Update": "@items('ACTION_025')['Last Update']"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "ACTION_149": {
+                  "runAfter": {
+                    "ACTION_250": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+                      "connectionName": "CONNECTION_NAME_014",
+                      "operationId": "GetItems"
+                    },
+                    "parameters": {
+                      "source": "SOURCE_ID_004",
+                      "drive": "DRIVE_ID_002",
+                      "file": "FILE_ID_002",
+                      "table": "TABLE_ID_004",
+                      "$filter": "CITY eq '@{items('ACTION_025')['City']}'"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "ACTION_026": {
+                  "foreach": "@outputs('ACTION_149')?['body/value']",
+                  "actions": {
+                    "ACTION_016": {
+                      "runAfter": {},
+                      "type": "AppendToArrayVariable",
+                      "inputs": {
+                        "name": "Data_Polreg",
+                        "value": "@items('ACTION_026')"
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "ACTION_149": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Foreach"
+                }
+              },
+              "runAfter": {},
+              "expression": {
+                "contains": [
+                  "@items('ACTION_025')['Validate_Server']",
+                  "Done"
+                ]
+              },
+              "type": "If"
+            }
+          },
+          "runAfter": {
+            "ACTION_163": [
+              "Succeeded"
+            ]
+          },
+          "type": "Foreach"
+        },
+        "ACTION_078": {
+          "runAfter": {
+            "ACTION_131": [
+              "Succeeded"
+            ]
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "Data_Polreg",
+                "type": "array"
+              }
+            ]
+          }
+        },
+        "ACTION_164": {
+          "runAfter": {
+            "ACTION_025": [
+              "Succeeded"
+            ]
+          },
+          "type": "ParseJson",
+          "inputs": {
+            "content": "@variables('ACTION_078')",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "@@odata.etag": {
+                    "type": "string"
+                  },
+                  "ItemInternalId": {
+                    "type": "string"
+                  },
+                  "AREA NATIONAL": {
+                    "type": "string"
+                  },
+                  "AREA": {
+                    "type": "string"
+                  },
+                  "PROVINCE": {
+                    "type": "string"
+                  },
+                  "CITY": {
+                    "type": "string"
+                  },
+                  "UNIT": {
+                    "type": "string"
+                  },
+                  "Conclusion": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "@@odata.etag",
+                  "ItemInternalId",
+                  "AREA NATIONAL",
+                  "AREA",
+                  "UNIT",
+                  "Conclusion"
+                ]
+              }
+            }
+          }
+        },
+        "ACTION_213": {
+          "runAfter": {
+            "ACTION_116": [
+              "Succeeded"
+            ]
+          },
+          "type": "Select",
+          "inputs": {
+            "from": "@body('ACTION_164')",
+            "select": {
+              "AREA": "@item()['AREA']"
+            }
+          }
+        },
+        "ACTION_080": {
+          "runAfter": {
+            "ACTION_213": [
+              "Succeeded"
+            ]
+          },
+          "type": "Compose",
+          "inputs": "@union(body('ACTION_213'),body('ACTION_213'))"
+        },
+        "ACTION_173": {
+          "runAfter": {
+            "ACTION_164": [
+              "Succeeded"
+            ]
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+              "connectionName": "CONNECTION_NAME_014",
+              "operationId": "GetItems"
+            },
+            "parameters": {
+              "source": "SOURCE_ID_004",
+              "drive": "DRIVE_ID_002",
+              "file": "FILE_ID_002",
+              "table": "TABLE_ID_004"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runtimeConfiguration": {
+            "paginationPolicy": {
+              "minimumItemCount": 999
+            }
+          }
+        },
+        "ACTION_194": {
+          "runAfter": {
+            "ACTION_173": [
+              "Succeeded"
+            ]
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+              "connectionName": "CONNECTION_NAME_014",
+              "operationId": "GetItems"
+            },
+            "parameters": {
+              "source": "SOURCE_ID_004",
+              "drive": "DRIVE_ID_002",
+              "file": "FILE_ID_002",
+              "table": "TABLE_ID_005"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "ACTION_225": {
+          "runAfter": {
+            "ACTION_037": [
+              "Succeeded"
+            ]
+          },
+          "type": "Expression",
+          "kind": "SubtractFromTime",
+          "inputs": {
+            "baseTime": "@body('ACTION_077')",
+            "interval": 1,
+            "timeUnit": "Month"
+          }
+        },
+        "ACTION_037": {
+          "runAfter": {
+            "ACTION_080": [
+              "Succeeded"
+            ]
+          },
+          "type": "ParseJson",
+          "inputs": {
+            "content": "@outputs('ACTION_080')",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "AREA": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "AREA"
+                ]
+              }
+            }
+          }
+        },
+        "ACTION_023": {
+          "foreach": "@outputs('ACTION_194')?['body/value']",
+          "actions": {
+            "ACTION_223": {
+              "runAfter": {},
+              "type": "Compose",
+              "inputs": "Data @{formatDateTime(parseDateTime(split(body('ACTION_225'), '.')[0]), 'MMMM yyyy', 'en-US')} -Area @{items('ACTION_023')?['AREA']} - Progress Eview"
+            },
+            "ACTION_170": {
+              "runAfter": {
+                "ACTION_223": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Compose",
+              "inputs": "@if(equals(length(split(items('ACTION_023')?['Percentage'], '.')), 2), concat(formatNumber(mul(float(items('ACTION_023')?['Percentage']), 100), '0.0'), '%'), concat(items('ACTION_023')?['Percentage'], formatNumber(mul(float(items('ACTION_023')?['Percentage']), 0.1), '00'), '%'))"
+            },
+            "ACTION_168": {
+              "runAfter": {
+                "ACTION_170": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Compose",
+              "inputs": "@if(equals(length(split(outputs('ACTION_116')?['body/Percentage'], '.')), 2), concat(formatNumber(mul(float(outputs('ACTION_116')?['body/Percentage']), 100), '0.0'), '%'), concat(outputs('ACTION_116')?['body/Percentage'], formatNumber(mul(float(outputs('ACTION_116')?['body/Percentage']), 0.1), '00'), '%'))"
+            },
+            "ACTION_111": {
+              "runAfter": {
+                "ACTION_168": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Compose",
+              "inputs": "<p>REPORT_CONTENT</p>"
+            },
+            "ACTION_027": {
+              "foreach": "@body('ACTION_037')",
+              "actions": {
+                "ACTION_051": {
+                  "actions": {
+                    "ACTION_227": {
+                      "runAfter": {
+                        "ACTION_199": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "Table",
+                      "inputs": {
+                        "from": "@body('ACTION_199')",
+                        "format": "HTML"
+                      }
+                    },
+                    "ACTION_199": {
+                      "runAfter": {},
+                      "type": "Select",
+                      "inputs": {
+                        "from": "@outputs('ACTION_118')?['body/value']",
+                        "select": {
+                          "ACTION_037": "@item()?['ACTION_037']",
+                          "Province": "@item()?['Province']",
+                          "%": "@item()?['%']",
+                          "Count": "@item()?['Count']"
+                        }
+                      }
+                    },
+                    "ACTION_082": {
+                      "runAfter": {
+                        "ACTION_227": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "Compose",
+                      "inputs": "<p>REPORT_CONTENT</p>"
+                    },
+                    "ACTION_210": {
+                      "runAfter": {
+                        "ACTION_082": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "Compose",
+                      "inputs": "<p>REPORT_CONTENT</p>"
+                    },
+                    "ACTION_216": {
+                      "runAfter": {
+                        "ACTION_210": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+                          "connectionName": "CONNECTION_NAME_006",
+                          "operationId": "SendEmailV2"
+                        },
+                        "parameters": {
+                          "emailMessage/To": "@items('ACTION_023')?['email']",
+                          "emailMessage/Subject": "@outputs('ACTION_223')",
+                          "emailMessage/Body": "<p>REPORT_CONTENT</p>",
+                          "emailMessage/Cc": "user_007@example.com",
+                          "emailMessage/Importance": "Normal"
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    }
+                  },
+                  "runAfter": {},
+                  "expression": {
+                    "contains": [
+                      "@outputs('ACTION_223')",
+                      "@items('ACTION_027')['AREA']"
+                    ]
+                  },
+                  "type": "If"
+                }
+              },
+              "runAfter": {
+                "ACTION_111": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Foreach"
+            }
+          },
+          "runAfter": {
+            "ACTION_118": [
+              "Succeeded"
+            ]
+          },
+          "type": "Foreach"
+        },
+        "ACTION_116": {
+          "runAfter": {
+            "ACTION_194": [
+              "Succeeded"
+            ]
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+              "connectionName": "CONNECTION_NAME_014",
+              "operationId": "GetItem"
+            },
+            "parameters": {
+              "source": "SOURCE_ID_004",
+              "drive": "DRIVE_ID_002",
+              "file": "FILE_ID_002",
+              "table": "TABLE_ID_006",
+              "idColumn": "Area",
+              "id": "National"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "ACTION_118": {
+          "runAfter": {
+            "ACTION_225": [
+              "Succeeded"
+            ]
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+              "connectionName": "CONNECTION_NAME_014",
+              "operationId": "GetItems"
+            },
+            "parameters": {
+              "source": "SOURCE_ID_004",
+              "drive": "DRIVE_ID_002",
+              "file": "FILE_ID_002",
+              "table": "TABLE_ID_007"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "ACTION_113": {
+          "runAfter": {},
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sql",
+              "connectionName": "CONNECTION_NAME_013",
+              "operationId": "SqlExecutePassThroughPowerQuery"
+            },
+            "parameters": {
+              "query/query": "let Source = Sql.Database(\"SQL_SERVER\", \"DATABASE_NAME\") in Source"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "ACTION_028": {
+          "foreach": "@outputs('ACTION_113')?['body/value']",
+          "actions": {
+            "ACTION_251": {
+              "runAfter": {},
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+                  "connectionName": "CONNECTION_NAME_014",
+                  "operationId": "PatchItem"
+                },
+                "parameters": {
+                  "source": "SOURCE_ID_004",
+                  "drive": "DRIVE_ID_002",
+                  "file": "FILE_ID_002",
+                  "table": "TABLE_ID_008",
+                  "idColumn": "Index",
+                  "id": "@items('ACTION_028')?['index']",
+                  "item/Area Dealer": "@items('ACTION_028')?['AREA_MDLR_NAME']",
+                  "item/Province Name": "@items('ACTION_028')?['PROVINCE_NAME']",
+                  "item/Current City": "@items('ACTION_028')?['num_city_current']",
+                  "item/City Count": "@items('ACTION_028')?['City Count']",
+                  "item/Percentage City": "@items('ACTION_028')?['percentage_city']",
+                  "item/Index": "@items('ACTION_028')?['index']"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            }
+          },
+          "runAfter": {
+            "ACTION_113": [
+              "Succeeded"
+            ]
+          },
+          "type": "Foreach"
+        },
+        "ACTION_236": {
+          "runAfter": {},
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sql",
+              "connectionName": "CONNECTION_NAME_013",
+              "operationId": "SqlExecutePassThroughPowerQuery"
+            },
+            "parameters": {
+              "query/query": "let Source = Sql.Database(\"SQL_SERVER\", \"DATABASE_NAME\") in Source"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "ACTION_029": {
+          "foreach": "@outputs('ACTION_236')?['body/value']",
+          "actions": {
+            "ACTION_252": {
+              "runAfter": {},
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+                  "connectionName": "CONNECTION_NAME_014",
+                  "operationId": "PatchItem"
+                },
+                "parameters": {
+                  "source": "SOURCE_ID_004",
+                  "drive": "DRIVE_ID_002",
+                  "file": "FILE_ID_002",
+                  "table": "TABLE_ID_009",
+                  "idColumn": "AREA_MDLR_NAME",
+                  "id": "@items('ACTION_029')?['AREA_MDLR_NAME']",
+                  "item/AREA_MDLR_NAME": "@items('ACTION_029')?['AREA_MDLR_NAME']",
+                  "item/Current_City": "@items('ACTION_029')?['Current_City']",
+                  "item/Total City": "@items('ACTION_029')?['City_Count']"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            }
+          },
+          "runAfter": {
+            "ACTION_236": [
+              "Succeeded"
+            ]
+          },
+          "type": "Foreach"
+        },
+        "ACTION_086": {
+          "runAfter": {
+            "ACTION_151": [
+              "Succeeded"
+            ]
+          },
+          "type": "Query",
+          "inputs": {
+            "from": "@outputs('ACTION_151')?['body/value']",
+            "where": "@equals(item()?['Month2'], '')"
+          }
+        },
+        "ACTION_102": {
+          "runAfter": {
+            "ACTION_086": [
+              "Succeeded"
+            ]
+          },
+          "type": "Query",
+          "inputs": {
+            "from": "@outputs('ACTION_235')?['body/value']",
+            "where": "@not(equals(item()?['Month2'], null))"
+          }
+        },
+        "ACTION_132": {
+          "runAfter": {
+            "ACTION_102": [
+              "Succeeded"
+            ]
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "Data2",
+                "type": "array"
+              }
+            ]
+          }
+        },
+        "ACTION_079": {
+          "runAfter": {
+            "ACTION_132": [
+              "Succeeded"
+            ]
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "Data_Polreg2",
+                "type": "array"
+              }
+            ]
+          }
+        },
+        "ACTION_030": {
+          "foreach": "@body('ACTION_086')",
+          "actions": {
+            "ACTION_110": {
+              "runAfter": {},
+              "type": "Query",
+              "inputs": {
+                "from": "@body('ACTION_102')",
+                "where": "@equals(item()?['CITY_NAME'], items('ACTION_030')?['City'])"
+              }
+            },
+            "ACTION_049": {
+              "runAfter": {
+                "ACTION_110": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Compose",
+              "inputs": {
+                "Province": "@{items('ACTION_030')?['Province']}",
+                "City": "@{items('ACTION_030')?['City']}",
+                "Area Main Dealer": "@{first(body('ACTION_110'))?['AREA_MDLR.AREA_MDLR_NAME']}",
+                "Month3": "@{first(body('ACTION_110'))?['Month3']}",
+                "Month2": "@{first(body('ACTION_110'))?['Month2']}",
+                "Month1": "@{first(body('ACTION_110'))?['Month1']}",
+                "Status": "@{first(body('ACTION_110'))?['Status']}",
+                "Validate": "@{first(body('ACTION_110'))?['Validate']}",
+                "Validate_Server": "@{first(body('ACTION_110'))?['Validate']}",
+                "Last Update": "@{body('ACTION_054')}"
+              }
+            },
+            "ACTION_017": {
+              "runAfter": {
+                "ACTION_049": [
+                  "Succeeded"
+                ]
+              },
+              "type": "AppendToArrayVariable",
+              "inputs": {
+                "name": "Data2",
+                "value": "@outputs('ACTION_049')"
+              }
+            }
+          },
+          "runAfter": {
+            "ACTION_079": [
+              "Succeeded"
+            ]
+          },
+          "type": "Foreach"
+        },
+        "ACTION_165": {
+          "runAfter": {
+            "ACTION_030": [
+              "Succeeded"
+            ]
+          },
+          "type": "ParseJson",
+          "inputs": {
+            "content": "@variables('Data2')",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "Province": {
+                    "type": "string"
+                  },
+                  "City": {
+                    "type": "string"
+                  },
+                  "Area Main Dealer": {
+                    "type": "string"
+                  },
+                  "Month3": {
+                    "type": "string"
+                  },
+                  "Month2": {
+                    "type": "string"
+                  },
+                  "Month1": {
+                    "type": "string"
+                  },
+                  "Status": {
+                    "type": "string"
+                  },
+                  "Validate": {
+                    "type": "string"
+                  },
+                  "Validate_Server": {
+                    "type": "string"
+                  },
+                  "Last Update": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "Province",
+                  "City",
+                  "Area Main Dealer",
+                  "Month3",
+                  "Month2",
+                  "Month1",
+                  "Status",
+                  "Validate",
+                  "Validate_Server",
+                  "Last Update"
+                ]
+              }
+            }
+          }
+        },
+        "ACTION_031": {
+          "foreach": "@body('ACTION_165')",
+          "actions": {
+            "ACTION_052": {
+              "actions": {
+                "ACTION_253": {
+                  "runAfter": {},
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+                      "connectionName": "CONNECTION_NAME_014",
+                      "operationId": "PatchItem"
+                    },
+                    "parameters": {
+                      "source": "SOURCE_ID_004",
+                      "drive": "DRIVE_ID_002",
+                      "file": "FILE_ID_002",
+                      "table": "TABLE_ID_003",
+                      "idColumn": "City",
+                      "id": "@items('ACTION_031')['City']",
+                      "item/Province": "@items('ACTION_031')['Province']",
+                      "item/City": "@items('ACTION_031')['City']",
+                      "item/Area Main Dealer": "@items('ACTION_031')['Area Main Dealer']",
+                      "item/Month3": "@items('ACTION_031')['Month3']",
+                      "item/Month2": "@items('ACTION_031')['Month2']",
+                      "item/Month1": "@items('ACTION_031')['Month1']",
+                      "item/Status": "@items('ACTION_031')['Status']",
+                      "item/Validate": "@items('ACTION_031')['Validate']",
+                      "item/Last Update": "@items('ACTION_031')['Last Update']"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "ACTION_150": {
+                  "runAfter": {
+                    "ACTION_253": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+                      "connectionName": "CONNECTION_NAME_014",
+                      "operationId": "GetItems"
+                    },
+                    "parameters": {
+                      "source": "SOURCE_ID_004",
+                      "drive": "DRIVE_ID_002",
+                      "file": "FILE_ID_002",
+                      "table": "TABLE_ID_010",
+                      "$filter": "CITY eq '@{items('ACTION_031')['City']}'"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "ACTION_032": {
+                  "foreach": "@outputs('ACTION_150')?['body/value']",
+                  "actions": {
+                    "ACTION_018": {
+                      "runAfter": {},
+                      "type": "AppendToArrayVariable",
+                      "inputs": {
+                        "name": "Data_Polreg2",
+                        "value": "@items('ACTION_032')"
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "ACTION_150": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Foreach"
+                }
+              },
+              "runAfter": {},
+              "expression": {
+                "not": {
+                  "equals": [
+                    "@items('ACTION_031')['Month2']",
+                    ""
+                  ]
+                }
+              },
+              "type": "If"
+            }
+          },
+          "runAfter": {
+            "ACTION_165": [
+              "Succeeded"
+            ]
+          },
+          "type": "Foreach"
+        },
+        "ACTION_166": {
+          "runAfter": {
+            "ACTION_031": [
+              "Succeeded"
+            ]
+          },
+          "type": "ParseJson",
+          "inputs": {
+            "content": "@variables('Data_Polreg2')",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "@@odata.etag": {
+                    "type": "string"
+                  },
+                  "ItemInternalId": {
+                    "type": "string"
+                  },
+                  "AREA NATIONAL": {
+                    "type": "string"
+                  },
+                  "ACTION_037": {
+                    "type": "string"
+                  },
+                  "PROVINCE": {
+                    "type": "string"
+                  },
+                  "CITY": {
+                    "type": "string"
+                  },
+                  "UNIT": {
+                    "type": "string"
+                  },
+                  "Conclusion": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "@@odata.etag",
+                  "ItemInternalId",
+                  "AREA NATIONAL",
+                  "AREA",
+                  "UNIT",
+                  "Conclusion"
+                ]
+              }
+            }
+          }
+        },
+        "ACTION_174": {
+          "runAfter": {
+            "ACTION_166": [
+              "Succeeded"
+            ]
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+              "connectionName": "CONNECTION_NAME_014",
+              "operationId": "GetItems"
+            },
+            "parameters": {
+              "source": "SOURCE_ID_004",
+              "drive": "DRIVE_ID_002",
+              "file": "FILE_ID_002",
+              "table": "TABLE_ID_011"
+            },
+            "authentication": "@parameters('$authentication')"
+          },
+          "runtimeConfiguration": {
+            "paginationPolicy": {
+              "minimumItemCount": 999
+            }
+          }
+        },
+        "ACTION_195": {
+          "runAfter": {
+            "ACTION_174": [
+              "Succeeded"
+            ]
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+              "connectionName": "CONNECTION_NAME_014",
+              "operationId": "GetItems"
+            },
+            "parameters": {
+              "source": "SOURCE_ID_004",
+              "drive": "DRIVE_ID_002",
+              "file": "FILE_ID_002",
+              "table": "TABLE_ID_012"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "ACTION_117": {
+          "runAfter": {
+            "ACTION_195": [
+              "Succeeded"
+            ]
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+              "connectionName": "CONNECTION_NAME_014",
+              "operationId": "GetItem"
+            },
+            "parameters": {
+              "source": "SOURCE_ID_004",
+              "drive": "DRIVE_ID_002",
+              "file": "FILE_ID_002",
+              "table": "TABLE_ID_013",
+              "idColumn": "Area",
+              "id": "National"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "ACTION_214": {
+          "runAfter": {
+            "ACTION_117": [
+              "Succeeded"
+            ]
+          },
+          "type": "Select",
+          "inputs": {
+            "from": "@body('ACTION_166')",
+            "select": {
+              "ACTION_037": "@item()['AREA']"
+            }
+          }
+        },
+        "ACTION_081": {
+          "runAfter": {
+            "ACTION_214": [
+              "Succeeded"
+            ]
+          },
+          "type": "Compose",
+          "inputs": "@union(body('ACTION_214'), body('ACTION_214'))"
+        },
+        "ACTION_038": {
+          "runAfter": {
+            "ACTION_081": [
+              "Succeeded"
+            ]
+          },
+          "type": "ParseJson",
+          "inputs": {
+            "content": "@outputs('ACTION_081')",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "ACTION_037": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "Area"
+                ]
+              }
+            }
+          }
+        },
+        "ACTION_226": {
+          "runAfter": {
+            "ACTION_038": [
+              "Succeeded"
+            ]
+          },
+          "type": "Expression",
+          "kind": "SubtractFromTime",
+          "inputs": {
+            "baseTime": "@body('ACTION_077')",
+            "interval": 2,
+            "timeUnit": "Month"
+          }
+        },
+        "ACTION_119": {
+          "runAfter": {
+            "ACTION_226": [
+              "Succeeded"
+            ]
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+              "connectionName": "CONNECTION_NAME_014",
+              "operationId": "GetItems"
+            },
+            "parameters": {
+              "source": "SOURCE_ID_004",
+              "drive": "DRIVE_ID_002",
+              "file": "FILE_ID_002",
+              "table": "TABLE_ID_014"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "ACTION_033": {
+          "foreach": "@outputs('ACTION_195')?['body/value']",
+          "actions": {
+            "ACTION_224": {
+              "runAfter": {},
+              "type": "Compose",
+              "inputs": "Data @{formatDateTime(parseDateTime(split(body('ACTION_226'), '.')[0]), 'MMMM yyyy', 'en-US')} -Area @{items('ACTION_033')?['AREA']} - Progress Eview"
+            },
+            "ACTION_171": {
+              "runAfter": {
+                "ACTION_224": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Compose",
+              "inputs": "@if(equals(length(split(items('ACTION_033')?['Percentage'], '.')), 2), concat(formatNumber(mul(float(items('ACTION_033')?['Percentage']), 100), '0.0'), '%'), concat(items('ACTION_033')?['Percentage'], formatNumber(mul(float(items('ACTION_033')?['Percentage']), 0.1), '00'), '%'))"
+            },
+            "ACTION_169": {
+              "runAfter": {
+                "ACTION_171": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Compose",
+              "inputs": "@if(equals(length(split(outputs('ACTION_117')?['body/Percentage'], '.')), 2), concat(formatNumber(mul(float(outputs('ACTION_117')?['body/Percentage']), 100), '0.0'), '%'), concat(outputs('ACTION_117')?['body/Percentage'], formatNumber(mul(float(outputs('ACTION_117')?['body/Percentage']), 0.1), '00'), '%'))"
+            },
+            "ACTION_112": {
+              "runAfter": {
+                "ACTION_169": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Compose",
+              "inputs": "<p>REPORT_CONTENT</p>"
+            },
+            "ACTION_024": {
+              "foreach": "@body('ACTION_038')",
+              "actions": {
+                "ACTION_053": {
+                  "actions": {
+                    "ACTION_228": {
+                      "runAfter": {
+                        "ACTION_200": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "Table",
+                      "inputs": {
+                        "from": "@body('ACTION_200')",
+                        "format": "HTML"
+                      }
+                    },
+                    "ACTION_200": {
+                      "runAfter": {},
+                      "type": "Select",
+                      "inputs": {
+                        "from": "@outputs('ACTION_119')?['body/value']",
+                        "select": {
+                          "ACTION_037": "@item()?['ACTION_037']",
+                          "Province": "@item()?['Province']",
+                          "%": "@item()?['%']",
+                          "Count": "@item()?['Count']"
+                        }
+                      }
+                    },
+                    "ACTION_083": {
+                      "runAfter": {
+                        "ACTION_228": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "Compose",
+                      "inputs": "<p>REPORT_CONTENT</p>"
+                    },
+                    "ACTION_211": {
+                      "runAfter": {
+                        "ACTION_083": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "Compose",
+                      "inputs": "<p>REPORT_CONTENT</p>"
+                    },
+                    "ACTION_217": {
+                      "runAfter": {
+                        "ACTION_211": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+                          "connectionName": "CONNECTION_NAME_006",
+                          "operationId": "SendEmailV2"
+                        },
+                        "parameters": {
+                          "emailMessage/To": "@items('ACTION_033')?['email']",
+                          "emailMessage/Subject": "@outputs('ACTION_224')",
+                          "emailMessage/Body": "<p>REPORT_CONTENT</p>",
+                          "emailMessage/Cc": "user_007@example.com",
+                          "emailMessage/Importance": "Normal"
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    }
+                  },
+                  "runAfter": {},
+                  "expression": {
+                    "contains": [
+                      "@outputs('ACTION_224')",
+                      "@items('ACTION_024')['AREA']"
+                    ]
+                  },
+                  "type": "If"
+                }
+              },
+              "runAfter": {
+                "ACTION_112": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Foreach"
+            }
+          },
+          "runAfter": {
+            "ACTION_119": [
+              "Succeeded"
+            ]
+          },
+          "type": "Foreach"
+        }
+      }
+    },
+    "connectionReferences": {
+      "shared_sql": {
+        "connectionName": "CONNECTION_NAME_015",
+        "source": "SOURCE_ID_002",
+        "id": "/providers/Microsoft.PowerApps/apis/shared_sql",
+        "tier": "NotSpecified",
+        "apiName": "sql",
+        "isProcessSimpleApiReferenceConversionAlreadyDone": false
+      },
+      "shared_excelonlinebusiness": {
+        "connectionName": "CONNECTION_NAME_016",
+        "source": "SOURCE_ID_002",
+        "id": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+        "tier": "NotSpecified",
+        "apiName": "excelonlinebusiness",
+        "isProcessSimpleApiReferenceConversionAlreadyDone": false
+      },
+      "shared_office365": {
+        "connectionName": "CONNECTION_NAME_017",
+        "source": "SOURCE_ID_002",
+        "id": "/providers/Microsoft.PowerApps/apis/shared_office365",
+        "tier": "NotSpecified",
+        "apiName": "office365",
+        "isProcessSimpleApiReferenceConversionAlreadyDone": false
+      }
+    },
+    "flowFailureAlertSubscribed": false,
+    "isManaged": false
+  }
+}

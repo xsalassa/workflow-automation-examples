@@ -1,0 +1,11 @@
+flowchart LR
+    S0["Load and validate: template / properties"]
+    S1["Refresh schedule: workday / holiday PIC"]
+    S2["Find or create file: year/month folders"]
+    S3["Prepare new workbook: copy sheets / profile"]
+    S4["Save links and state: master / history / props"]
+    S0 --> S1 --> S2 --> S3 --> S4
+    B0["Existing daily file: validate; state; return"]
+    B1["Later service checks: scheduled / manual"]
+    S2 -->|already exists; preserve contents| B0
+    S4 -. later triggers / UI .-> B1

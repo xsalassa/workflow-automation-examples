@@ -1,0 +1,11 @@
+flowchart LR
+    S0["Weekday trigger: scheduled workflow"]
+    S1["Read the checklist: Excel activities"]
+    S2["Build the summary: activities and progress"]
+    S3["Send the report: Teams and email"]
+    S4["Archive and clean: monthly log; marked rows"]
+    S0 --> S1 --> S2 --> S3 --> S4
+    B0["Small activity set: article shows a stop check"]
+    B1["Pending activities: include in the summary"]
+    S1 -. condition .-> B0
+    S2 -. source note .-> B1

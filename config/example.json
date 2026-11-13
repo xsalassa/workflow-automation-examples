@@ -1,0 +1,10 @@
+{
+  "purpose": "Documentation-only configuration inventory; no automatic loader",
+  "company_name": "COMPANY_NAME",
+  "owner_role": "REPORT_OWNER",
+  "sql": {"server": "SQL_SERVER", "database": "DATABASE_NAME", "authentication": "Configure a connection in the test tenant; do not store credentials here"},
+  "workbook": {"source": "SOURCE_ID", "drive": "DRIVE_ID", "file": "FILE_ID", "table": "TABLE_ID", "row_key": "RECORD_ID"},
+  "incoming_folder": "FOLDER_ID",
+  "notifications": {"recipient": "report-owner@example.com", "group": "GROUP_ID", "channel": "CHANNEL_ID"},
+  "secrets": "Supply through the platform connection store; never commit tokens"
+}
