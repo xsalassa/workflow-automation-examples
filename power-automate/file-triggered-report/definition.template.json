@@ -1,0 +1,4435 @@
+{
+  "name": "RESOURCE_ID_013",
+  "id": "/providers/Microsoft.Flow/flows/RESOURCE_ID_013",
+  "type": "Microsoft.Flow/flows",
+  "properties": {
+    "apiId": "/providers/Microsoft.PowerApps/apis/shared_logicflows",
+    "displayName": "DISPLAY_NAME_001",
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "triggers": {
+        "ACTION_262": {
+          "recurrence": {
+            "frequency": "Minute",
+            "interval": 1
+          },
+          "evaluatedRecurrence": {
+            "frequency": "Minute",
+            "interval": 1
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "folderId": "FOLDER_ID_001",
+              "includeSubfolders": true
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness",
+              "connectionName": "CONNECTION_NAME_001",
+              "operationId": "OnNewFilesV2"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        }
+      },
+      "actions": {
+        "ACTION_025": {
+          "foreach": "@triggerBody()",
+          "actions": {
+            "ACTION_122": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "id": "@items('ACTION_025')?['Id']"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness",
+                  "connectionName": "CONNECTION_NAME_001",
+                  "operationId": "GetFileMetadata"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "ACTION_186": {
+              "runAfter": {
+                "ACTION_122": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Compose",
+              "inputs": "@split(outputs('ACTION_122')?['body/Path'], '/')[2]"
+            },
+            "ACTION_114": {
+              "runAfter": {
+                "ACTION_115": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Compose",
+              "inputs": "@outputs('ACTION_122')?['body/Name']"
+            },
+            "ACTION_151": {
+              "runAfter": {
+                "ACTION_021": [
+                  "Succeeded"
+                ]
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "source": "SOURCE_ID_001",
+                  "drive": "DRIVE_ID_001",
+                  "file": "FILE_ID_001",
+                  "table": "TABLE_ID_001",
+                  "$filter": "MAIN_TASK eq '@{outputs('ACTION_162')}'"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+                  "connectionName": "CONNECTION_NAME_002",
+                  "operationId": "GetItems"
+                },
+                "authentication": "@parameters('$authentication')"
+              },
+              "description": "To get Rows contains Project, Main Task to Minimize Data"
+            },
+            "ACTION_172": {
+              "actions": {
+                "ACTION_155": {
+                  "type": "Compose",
+                  "inputs": "@split(outputs('ACTION_122')?['body/Path'], '/')[5]",
+                  "description": "Example Output : 10 Oct"
+                },
+                "ACTION_094": {
+                  "runAfter": {
+                    "ACTION_155": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Query",
+                  "inputs": {
+                    "from": "@outputs('ACTION_151')?['body/value']",
+                    "where": "@equals(item()?['Month_Data'], outputs('ACTION_155'))"
+                  }
+                },
+                "ACTION_058": {
+                  "runAfter": {
+                    "ACTION_094": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ParseJson",
+                  "inputs": {
+                    "content": "@body('ACTION_094')",
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "@@odata.etag": {
+                            "type": "string"
+                          },
+                          "ItemInternalId": {
+                            "type": "string"
+                          },
+                          "Project": {
+                            "type": "string"
+                          },
+                          "MAIN_TASK": {
+                            "type": "string"
+                          },
+                          "SUBTASK": {
+                            "type": "string"
+                          },
+                          "CHILDTASK": {
+                            "type": "string"
+                          },
+                          "ACTION_084": {
+                            "type": "string"
+                          },
+                          "START_DATE": {
+                            "type": "string"
+                          },
+                          "END_DATE": {
+                            "type": "string"
+                          },
+                          "Status": {
+                            "type": "string"
+                          },
+                          "Year": {
+                            "type": "string"
+                          },
+                          "Month": {
+                            "type": "string"
+                          },
+                          "TYPE": {
+                            "type": "string"
+                          },
+                          "Helper": {
+                            "type": "string"
+                          },
+                          "Month_Data": {
+                            "type": "string"
+                          },
+                          "Index": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "@@odata.etag",
+                          "ItemInternalId",
+                          "Project",
+                          "MAIN_TASK",
+                          "SUBTASK",
+                          "CHILDTASK",
+                          "Filename",
+                          "START_DATE",
+                          "END_DATE",
+                          "Status",
+                          "Year",
+                          "Month",
+                          "TYPE",
+                          "Helper",
+                          "Month_Data",
+                          "Index"
+                        ]
+                      }
+                    }
+                  }
+                },
+                "ACTION_022": {
+                  "foreach": "@body('ACTION_058')",
+                  "actions": {
+                    "ACTION_250": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "source": "SOURCE_ID_001",
+                          "drive": "DRIVE_ID_001",
+                          "file": "FILE_ID_001",
+                          "table": "TABLE_ID_001",
+                          "idColumn": "Index",
+                          "id": "@items('ACTION_022')['Index']",
+                          "item/START_DATE": "@formatDateTime(parseDateTime(split(body('ACTION_222'), '.')[0]), 'MM/dd/yyyy', 'en-US')"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+                          "connectionName": "CONNECTION_NAME_002",
+                          "operationId": "PatchItem"
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "ACTION_123": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Foreach"
+                },
+                "ACTION_071": {
+                  "runAfter": {
+                    "ACTION_058": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "path": "@outputs('ACTION_122')?['body/Path']",
+                      "type": "View",
+                      "dataset_02": "Anonymous"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness",
+                      "connectionName": "CONNECTION_NAME_001",
+                      "operationId": "CreateShareLinkByPathV2"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "ACTION_015": {
+                  "runAfter": {
+                    "ACTION_071": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "AppendToArrayVariable",
+                  "inputs": {
+                    "name": "arrayAttachment",
+                    "value": {
+                      "Name": "@outputs('ACTION_122')?['body/Name']",
+                      "Link": "@outputs('ACTION_071')?['body/WebUrl']"
+                    }
+                  }
+                },
+                "ACTION_010": {
+                  "runAfter": {
+                    "ACTION_015": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "AppendToStringVariable",
+                  "inputs": {
+                    "name": "link",
+                    "value": "<p>REPORT_CONTENT</p>"
+                  }
+                },
+                "ACTION_123": {
+                  "runAfter": {
+                    "ACTION_010": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "IncrementVariable",
+                  "inputs": {
+                    "name": "linkcount",
+                    "value": 1
+                  }
+                },
+                "ACTION_188": {
+                  "runAfter": {
+                    "ACTION_022": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "project_name",
+                    "value": "Polreg"
+                  }
+                }
+              },
+              "runAfter": {
+                "ACTION_151": [
+                  "Succeeded"
+                ]
+              },
+              "else": {
+                "actions": {
+                  "ACTION_050": {
+                    "actions": {
+                      "ACTION_156": {
+                        "type": "Compose",
+                        "inputs": "@split(outputs('ACTION_122')?['body/Path'], '/')[8]",
+                        "description": "Example Output : 10 Oct"
+                      },
+                      "ACTION_095": {
+                        "runAfter": {
+                          "ACTION_156": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "Query",
+                        "inputs": {
+                          "from": "@outputs('ACTION_151')?['body/value']",
+                          "where": "@equals(item()?['Month_Data'], outputs('ACTION_156'))"
+                        }
+                      },
+                      "ACTION_059": {
+                        "runAfter": {
+                          "ACTION_095": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "ParseJson",
+                        "inputs": {
+                          "content": "@body('ACTION_095')",
+                          "schema": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "@@odata.etag": {
+                                  "type": "string"
+                                },
+                                "ItemInternalId": {
+                                  "type": "string"
+                                },
+                                "Project": {
+                                  "type": "string"
+                                },
+                                "MAIN_TASK": {
+                                  "type": "string"
+                                },
+                                "SUBTASK": {
+                                  "type": "string"
+                                },
+                                "CHILDTASK": {
+                                  "type": "string"
+                                },
+                                "ACTION_084": {
+                                  "type": "string"
+                                },
+                                "START_DATE": {
+                                  "type": "string"
+                                },
+                                "END_DATE": {
+                                  "type": "string"
+                                },
+                                "Status": {
+                                  "type": "string"
+                                },
+                                "Year": {
+                                  "type": "string"
+                                },
+                                "Month": {
+                                  "type": "string"
+                                },
+                                "TYPE": {
+                                  "type": "string"
+                                },
+                                "Helper": {
+                                  "type": "string"
+                                },
+                                "Month_Data": {
+                                  "type": "string"
+                                },
+                                "Index": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "@@odata.etag",
+                                "ItemInternalId",
+                                "Project",
+                                "MAIN_TASK",
+                                "SUBTASK",
+                                "CHILDTASK",
+                                "Filename",
+                                "START_DATE",
+                                "END_DATE",
+                                "Status",
+                                "Year",
+                                "Month",
+                                "TYPE",
+                                "Helper",
+                                "Month_Data",
+                                "Index"
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "ACTION_201": {
+                        "actions": {
+                          "ACTION_066": {
+                            "type": "OpenApiConnection",
+                            "inputs": {
+                              "parameters": {
+                                "path": "@outputs('ACTION_122')?['body/Path']",
+                                "type": "View",
+                                "dataset_02": "Anonymous"
+                              },
+                              "host": {
+                                "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness",
+                                "connectionName": "CONNECTION_NAME_001",
+                                "operationId": "CreateShareLinkByPathV2"
+                              },
+                              "authentication": "@parameters('$authentication')"
+                            }
+                          },
+                          "ACTION_005": {
+                            "runAfter": {
+                              "ACTION_066": [
+                                "Succeeded"
+                              ]
+                            },
+                            "type": "AppendToStringVariable",
+                            "inputs": {
+                              "name": "link",
+                              "value": "<p>REPORT_CONTENT</p>"
+                            }
+                          },
+                          "ACTION_125": {
+                            "runAfter": {
+                              "ACTION_005": [
+                                "Succeeded"
+                              ]
+                            },
+                            "type": "IncrementVariable",
+                            "inputs": {
+                              "name": "linkcount",
+                              "value": 1
+                            }
+                          }
+                        },
+                        "runAfter": {
+                          "ACTION_059": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "Scope"
+                      }
+                    },
+                    "else": {
+                      "actions": {}
+                    },
+                    "expression": {
+                      "equals": [
+                        "@outputs('ACTION_115')",
+                        "COMPANY_NAME WORLD"
+                      ]
+                    },
+                    "type": "If"
+                  }
+                }
+              },
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@outputs('ACTION_186')",
+                      "Police Registration"
+                    ]
+                  },
+                  {
+                    "not": {
+                      "equals": [
+                        "@outputs('ACTION_115')",
+                        "COMPANY_NAME WORLD"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "type": "If"
+            },
+            "ACTION_196": {
+              "actions": {
+                "ACTION_259": {
+                  "actions": {
+                    "ACTION_159": {
+                      "type": "Compose",
+                      "inputs": "@split(outputs('ACTION_122')?['body/Path'], '/')[5]",
+                      "description": "Example Output : 10 Oct"
+                    },
+                    "ACTION_098": {
+                      "runAfter": {
+                        "ACTION_159": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "Query",
+                      "inputs": {
+                        "from": "@outputs('ACTION_151')?['body/value']",
+                        "where": "@equals(item()?['Month_Data'], outputs('ACTION_159'))"
+                      }
+                    },
+                    "ACTION_062": {
+                      "runAfter": {
+                        "ACTION_098": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "ParseJson",
+                      "inputs": {
+                        "content": "@body('ACTION_098')",
+                        "schema": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "@@odata.etag": {
+                                "type": "string"
+                              },
+                              "ItemInternalId": {
+                                "type": "string"
+                              },
+                              "Project": {
+                                "type": "string"
+                              },
+                              "MAIN_TASK": {
+                                "type": "string"
+                              },
+                              "SUBTASK": {
+                                "type": "string"
+                              },
+                              "CHILDTASK": {
+                                "type": "string"
+                              },
+                              "ACTION_084": {
+                                "type": "string"
+                              },
+                              "START_DATE": {
+                                "type": "string"
+                              },
+                              "END_DATE": {
+                                "type": "string"
+                              },
+                              "Status": {
+                                "type": "string"
+                              },
+                              "Year": {
+                                "type": "string"
+                              },
+                              "Month": {
+                                "type": "string"
+                              },
+                              "TYPE": {
+                                "type": "string"
+                              },
+                              "Helper": {
+                                "type": "string"
+                              },
+                              "Month_Data": {
+                                "type": "string"
+                              },
+                              "Index": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "@@odata.etag",
+                              "ItemInternalId",
+                              "Project",
+                              "MAIN_TASK",
+                              "SUBTASK",
+                              "CHILDTASK",
+                              "Filename",
+                              "START_DATE",
+                              "END_DATE",
+                              "Status",
+                              "Year",
+                              "Month",
+                              "TYPE",
+                              "Helper",
+                              "Month_Data",
+                              "Index"
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    "ACTION_121": {
+                      "runAfter": {
+                        "ACTION_062": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "id": "@items('ACTION_025')?['Id']",
+                          "inferContentType": true
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness",
+                          "connectionName": "CONNECTION_NAME_001",
+                          "operationId": "GetFileContent"
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    },
+                    "ACTION_076": {
+                      "runAfter": {
+                        "ACTION_121": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "path": "@items('ACTION_025')?['Path']",
+                          "type": "View",
+                          "dataset_02": "Organization"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness",
+                          "connectionName": "CONNECTION_NAME_001",
+                          "operationId": "CreateShareLinkByPathV2"
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    },
+                    "ACTION_003": {
+                      "runAfter": {
+                        "ACTION_076": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "AppendToArrayVariable",
+                      "inputs": {
+                        "name": "arrayAttachment",
+                        "value": {
+                          "Name": "@outputs('ACTION_122')?['body/Name']",
+                          "Link": "@outputs('ACTION_076')?['body/WebUrl']"
+                        }
+                      }
+                    },
+                    "ACTION_001": {
+                      "runAfter": {
+                        "ACTION_003": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "AppendToStringVariable",
+                      "inputs": {
+                        "name": "link",
+                        "value": "<p>REPORT_CONTENT</p>"
+                      }
+                    },
+                    "ACTION_036": {
+                      "actions": {
+                        "ACTION_064": {
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "parameters": {
+                              "approvalType": "Basic",
+                              "ApprovalCreationInput/title": "Approval @{outputs('ACTION_114')}",
+                              "ApprovalCreationInput/assignedTo": "user_001@example.com;",
+                              "ApprovalCreationInput/details": "<p>REPORT_CONTENT</p>",
+                              "ApprovalCreationInput/itemLinkDescription": "@outputs('ACTION_114')",
+                              "ApprovalCreationInput/enableNotifications": true,
+                              "ApprovalCreationInput/enableReassignment": false
+                            },
+                            "host": {
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_approvals",
+                              "connectionName": "CONNECTION_NAME_003",
+                              "operationId": "CreateAnApproval"
+                            },
+                            "authentication": "@parameters('$authentication')"
+                          }
+                        },
+                        "ACTION_047": {
+                          "actions": {
+                            "ACTION_260": {
+                              "type": "OpenApiConnectionWebhook",
+                              "inputs": {
+                                "parameters": {
+                                  "approvalName": "@outputs('ACTION_064')?['body/name']"
+                                },
+                                "host": {
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_approvals",
+                                  "connectionName": "CONNECTION_NAME_003",
+                                  "operationId": "WaitForAnApproval"
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "ACTION_035": {
+                              "actions": {
+                                "ACTION_242": {
+                                  "foreach": "@body('ACTION_062')",
+                                  "actions": {
+                                    "ACTION_254": {
+                                      "type": "OpenApiConnection",
+                                      "inputs": {
+                                        "parameters": {
+                                          "source": "SOURCE_ID_001",
+                                          "drive": "DRIVE_ID_001",
+                                          "file": "FILE_ID_001",
+                                          "table": "TABLE_ID_001",
+                                          "idColumn": "Index",
+                                          "id": "@items('ACTION_242')['Index']",
+                                          "item/START_DATE": "@formatDateTime(addDays(outputs('ACTION_048'), add(5, mul(div(add(5, sub(dayOfWeek(outputs('ACTION_048')), 1)), 5), 2))), 'yyyy-MM-dd')",
+                                          "item/END_DATE": "@formatDateTime(parseDateTime(outputs('ACTION_260')?['body/completionDate']), 'yyyy-MM-dd', 'en-US')"
+                                        },
+                                        "host": {
+                                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+                                          "connectionName": "CONNECTION_NAME_002",
+                                          "operationId": "PatchItem"
+                                        },
+                                        "authentication": "@parameters('$authentication')"
+                                      }
+                                    },
+                                    "ACTION_056": {
+                                      "runAfter": {
+                                        "ACTION_254": [
+                                          "Succeeded"
+                                        ]
+                                      },
+                                      "type": "IncrementVariable",
+                                      "inputs": {
+                                        "name": "linkcount",
+                                        "value": 1
+                                      }
+                                    }
+                                  },
+                                  "type": "Foreach"
+                                }
+                              },
+                              "runAfter": {
+                                "ACTION_260": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "else": {
+                                "actions": {}
+                              },
+                              "expression": {
+                                "and": [
+                                  {
+                                    "contains": [
+                                      "@items('ACTION_025')?['NameNoExt']",
+                                      "Market and COMPANY_NAME performance"
+                                    ]
+                                  },
+                                  {
+                                    "equals": [
+                                      "@outputs('ACTION_260')?['body/outcome']",
+                                      "Approve"
+                                    ]
+                                  }
+                                ]
+                              },
+                              "type": "If"
+                            }
+                          },
+                          "runAfter": {
+                            "ACTION_064": [
+                              "Succeeded"
+                            ]
+                          },
+                          "else": {
+                            "actions": {}
+                          },
+                          "expression": {
+                            "equals": [
+                              "@outputs('ACTION_064')?['body/name']",
+                              "@outputs('ACTION_064')?['body/name']"
+                            ]
+                          },
+                          "type": "If"
+                        }
+                      },
+                      "runAfter": {
+                        "ACTION_001": [
+                          "Succeeded"
+                        ]
+                      },
+                      "else": {
+                        "actions": {}
+                      },
+                      "expression": {
+                        "endsWith": [
+                          "@outputs('ACTION_114')",
+                          "xlsx"
+                        ]
+                      },
+                      "type": "If"
+                    },
+                    "ACTION_266": {
+                      "runAfter": {
+                        "ACTION_036": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "AppendToStringVariable",
+                      "inputs": {
+                        "name": "filename",
+                        "value": "@outputs('ACTION_122')?['body/Name']"
+                      }
+                    }
+                  },
+                  "else": {
+                    "actions": {}
+                  },
+                  "expression": {
+                    "contains": [
+                      "@outputs('ACTION_162')",
+                      "Team PR"
+                    ]
+                  },
+                  "type": "If"
+                }
+              },
+              "runAfter": {
+                "ACTION_151": [
+                  "Succeeded"
+                ]
+              },
+              "else": {
+                "actions": {
+                  "ACTION_197": {
+                    "actions": {
+                      "ACTION_157": {
+                        "type": "Compose",
+                        "inputs": "@split(outputs('ACTION_122')?['body/Path'], '/')[6]",
+                        "description": "Example Output : 10 Oct"
+                      },
+                      "ACTION_096": {
+                        "runAfter": {
+                          "ACTION_157": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "Query",
+                        "inputs": {
+                          "from": "@outputs('ACTION_151')?['body/value']",
+                          "where": "@equals(item()?['Month_Data'], outputs('ACTION_157'))"
+                        }
+                      },
+                      "ACTION_120": {
+                        "runAfter": {
+                          "ACTION_060": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "OpenApiConnection",
+                        "inputs": {
+                          "parameters": {
+                            "id": "@items('ACTION_025')?['Id']",
+                            "inferContentType": true
+                          },
+                          "host": {
+                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness",
+                            "connectionName": "CONNECTION_NAME_001",
+                            "operationId": "GetFileContent"
+                          },
+                          "authentication": "@parameters('$authentication')"
+                        }
+                      },
+                      "ACTION_063": {
+                        "runAfter": {
+                          "ACTION_120": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "OpenApiConnection",
+                        "inputs": {
+                          "parameters": {
+                            "path": "@items('ACTION_025')?['Path']",
+                            "type": "View",
+                            "dataset_02": "Anonymous"
+                          },
+                          "host": {
+                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness",
+                            "connectionName": "CONNECTION_NAME_001",
+                            "operationId": "CreateShareLinkByPathV2"
+                          },
+                          "authentication": "@parameters('$authentication')"
+                        }
+                      },
+                      "ACTION_060": {
+                        "runAfter": {
+                          "ACTION_096": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "ParseJson",
+                        "inputs": {
+                          "content": "@body('ACTION_096')",
+                          "schema": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "@@odata.etag": {
+                                  "type": "string"
+                                },
+                                "ItemInternalId": {
+                                  "type": "string"
+                                },
+                                "Project": {
+                                  "type": "string"
+                                },
+                                "MAIN_TASK": {
+                                  "type": "string"
+                                },
+                                "SUBTASK": {
+                                  "type": "string"
+                                },
+                                "CHILDTASK": {
+                                  "type": "string"
+                                },
+                                "ACTION_084": {
+                                  "type": "string"
+                                },
+                                "START_DATE": {
+                                  "type": "string"
+                                },
+                                "END_DATE": {
+                                  "type": "string"
+                                },
+                                "Status": {
+                                  "type": "string"
+                                },
+                                "Year": {
+                                  "type": "string"
+                                },
+                                "Month": {
+                                  "type": "string"
+                                },
+                                "TYPE": {
+                                  "type": "string"
+                                },
+                                "Helper": {
+                                  "type": "string"
+                                },
+                                "Month_Data": {
+                                  "type": "string"
+                                },
+                                "Index": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "@@odata.etag",
+                                "ItemInternalId",
+                                "Project",
+                                "MAIN_TASK",
+                                "SUBTASK",
+                                "CHILDTASK",
+                                "Filename",
+                                "START_DATE",
+                                "END_DATE",
+                                "Status",
+                                "Year",
+                                "Month",
+                                "TYPE",
+                                "Helper",
+                                "Month_Data",
+                                "Index"
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "ACTION_065": {
+                        "runAfter": {
+                          "ACTION_004": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "OpenApiConnection",
+                        "inputs": {
+                          "parameters": {
+                            "approvalType": "Basic",
+                            "ApprovalCreationInput/title": "Approval @{outputs('ACTION_114')}",
+                            "ApprovalCreationInput/assignedTo": "user_001@example.com;",
+                            "ApprovalCreationInput/details": "<p>REPORT_CONTENT</p>",
+                            "ApprovalCreationInput/itemLinkDescription": "@outputs('ACTION_114')",
+                            "ApprovalCreationInput/requestor": "user_002@example.com;",
+                            "ApprovalCreationInput/enableNotifications": true,
+                            "ApprovalCreationInput/enableReassignment": false
+                          },
+                          "host": {
+                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_approvals",
+                            "connectionName": "CONNECTION_NAME_003",
+                            "operationId": "CreateAnApproval"
+                          },
+                          "authentication": "@parameters('$authentication')"
+                        }
+                      },
+                      "ACTION_002": {
+                        "runAfter": {
+                          "ACTION_063": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "AppendToArrayVariable",
+                        "inputs": {
+                          "name": "arrayAttachment",
+                          "value": {
+                            "Name": "@outputs('ACTION_122')?['body/Name']",
+                            "Link": "@outputs('ACTION_063')?['body/WebUrl']"
+                          }
+                        }
+                      },
+                      "ACTION_004": {
+                        "runAfter": {
+                          "ACTION_002": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "AppendToStringVariable",
+                        "inputs": {
+                          "name": "link",
+                          "value": "<p>REPORT_CONTENT</p>"
+                        }
+                      }
+                    },
+                    "else": {
+                      "actions": {}
+                    },
+                    "expression": {
+                      "contains": [
+                        "@outputs('ACTION_162')",
+                        "COMPANY_NAME"
+                      ]
+                    },
+                    "type": "If"
+                  },
+                  "ACTION_046": {
+                    "actions": {
+                      "ACTION_261": {
+                        "type": "OpenApiConnectionWebhook",
+                        "inputs": {
+                          "parameters": {
+                            "approvalName": "@outputs('ACTION_065')?['body/name']"
+                          },
+                          "host": {
+                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_approvals",
+                            "connectionName": "CONNECTION_NAME_003",
+                            "operationId": "WaitForAnApproval"
+                          },
+                          "authentication": "@parameters('$authentication')"
+                        }
+                      },
+                      "ACTION_034": {
+                        "actions": {
+                          "ACTION_238": {
+                            "foreach": "@body('ACTION_060')",
+                            "actions": {
+                              "ACTION_249": {
+                                "type": "OpenApiConnection",
+                                "inputs": {
+                                  "parameters": {
+                                    "source": "SOURCE_ID_001",
+                                    "drive": "DRIVE_ID_001",
+                                    "file": "FILE_ID_001",
+                                    "table": "TABLE_ID_001",
+                                    "idColumn": "Index",
+                                    "id": "@items('ACTION_238')['Index']",
+                                    "item/START_DATE": "@body('ACTION_222')",
+                                    "item/END_DATE": "@formatDateTime(parseDateTime(split(outputs('ACTION_261')?['body/completionDate'], '.')[0]), 'M/d/yyyy', 'en-US')"
+                                  },
+                                  "host": {
+                                    "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+                                    "connectionName": "CONNECTION_NAME_004",
+                                    "operationId": "PatchItem"
+                                  },
+                                  "authentication": "@parameters('$authentication')"
+                                }
+                              },
+                              "ACTION_055": {
+                                "runAfter": {
+                                  "ACTION_249": [
+                                    "Succeeded"
+                                  ]
+                                },
+                                "type": "IncrementVariable",
+                                "inputs": {
+                                  "name": "linkcount",
+                                  "value": 1
+                                }
+                              }
+                            },
+                            "type": "Foreach"
+                          }
+                        },
+                        "runAfter": {
+                          "ACTION_261": [
+                            "Succeeded"
+                          ]
+                        },
+                        "else": {
+                          "actions": {}
+                        },
+                        "expression": {
+                          "equals": [
+                            "@outputs('ACTION_261')?['body/outcome']",
+                            "Approve"
+                          ]
+                        },
+                        "type": "If"
+                      }
+                    },
+                    "runAfter": {
+                      "ACTION_197": [
+                        "Succeeded"
+                      ]
+                    },
+                    "else": {
+                      "actions": {}
+                    },
+                    "expression": {
+                      "contains": [
+                        "@items('ACTION_025')?['Name']",
+                        "WS_RS_Import"
+                      ]
+                    },
+                    "type": "If"
+                  }
+                }
+              },
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@outputs('ACTION_186')",
+                      "Report"
+                    ]
+                  },
+                  {
+                    "equals": [
+                      "@outputs('ACTION_115')",
+                      "WS RS Team PR"
+                    ]
+                  }
+                ]
+              },
+              "type": "If"
+            },
+            "ACTION_115": {
+              "runAfter": {
+                "ACTION_186": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Compose",
+              "inputs": "@split(outputs('ACTION_122')?['body/Path'], '/')[3]"
+            },
+            "ACTION_184": {
+              "actions": {
+                "ACTION_158": {
+                  "type": "Compose",
+                  "inputs": "@split(outputs('ACTION_122')?['body/Path'], '/')[8]",
+                  "description": "Example Output : 10 Oct"
+                },
+                "ACTION_097": {
+                  "runAfter": {
+                    "ACTION_158": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Query",
+                  "inputs": {
+                    "from": "@outputs('ACTION_151')?['body/value']",
+                    "where": "@equals(item()?['Month_Data'], outputs('ACTION_158'))"
+                  }
+                },
+                "ACTION_061": {
+                  "runAfter": {
+                    "ACTION_097": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ParseJson",
+                  "inputs": {
+                    "content": "@body('ACTION_097')",
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "@@odata.etag": {
+                            "type": "string"
+                          },
+                          "ItemInternalId": {
+                            "type": "string"
+                          },
+                          "Project": {
+                            "type": "string"
+                          },
+                          "MAIN_TASK": {
+                            "type": "string"
+                          },
+                          "SUBTASK": {
+                            "type": "string"
+                          },
+                          "CHILDTASK": {
+                            "type": "string"
+                          },
+                          "ACTION_084": {
+                            "type": "string"
+                          },
+                          "START_DATE": {
+                            "type": "string"
+                          },
+                          "END_DATE": {
+                            "type": "string"
+                          },
+                          "Status": {
+                            "type": "string"
+                          },
+                          "Year": {
+                            "type": "string"
+                          },
+                          "Month": {
+                            "type": "string"
+                          },
+                          "TYPE": {
+                            "type": "string"
+                          },
+                          "Helper": {
+                            "type": "string"
+                          },
+                          "Month_Data": {
+                            "type": "string"
+                          },
+                          "Index": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "@@odata.etag",
+                          "ItemInternalId",
+                          "Project",
+                          "MAIN_TASK",
+                          "SUBTASK",
+                          "CHILDTASK",
+                          "Filename",
+                          "START_DATE",
+                          "END_DATE",
+                          "Status",
+                          "Year",
+                          "Month",
+                          "TYPE",
+                          "Helper",
+                          "Month_Data",
+                          "Index"
+                        ]
+                      }
+                    }
+                  }
+                },
+                "ACTION_109": {
+                  "runAfter": {
+                    "ACTION_061": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Query",
+                  "inputs": {
+                    "from": "@body('ACTION_061')",
+                    "where": "@equals(item()['MAIN_TASK'], outputs('ACTION_115'))"
+                  }
+                },
+                "ACTION_143": {
+                  "runAfter": {
+                    "ACTION_109": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ParseJson",
+                  "inputs": {
+                    "content": "@body('ACTION_109')",
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "@@odata.etag": {
+                            "type": "string"
+                          },
+                          "ItemInternalId": {
+                            "type": "string"
+                          },
+                          "Project": {
+                            "type": "string"
+                          },
+                          "MAIN_TASK": {
+                            "type": "string"
+                          },
+                          "SUBTASK": {
+                            "type": "string"
+                          },
+                          "CHILDTASK": {
+                            "type": "string"
+                          },
+                          "ACTION_084": {
+                            "type": "string"
+                          },
+                          "START_DATE": {
+                            "type": "string"
+                          },
+                          "END_DATE": {
+                            "type": "string"
+                          },
+                          "Status": {
+                            "type": "string"
+                          },
+                          "Year": {
+                            "type": "string"
+                          },
+                          "Month": {
+                            "type": "string"
+                          },
+                          "TYPE": {
+                            "type": "string"
+                          },
+                          "Helper": {
+                            "type": "string"
+                          },
+                          "Month_Data": {
+                            "type": "string"
+                          },
+                          "Index": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "@@odata.etag",
+                          "ItemInternalId",
+                          "Project",
+                          "MAIN_TASK",
+                          "SUBTASK",
+                          "CHILDTASK",
+                          "Filename",
+                          "START_DATE",
+                          "END_DATE",
+                          "Status",
+                          "Year",
+                          "Month",
+                          "TYPE",
+                          "Helper",
+                          "Month_Data",
+                          "Index"
+                        ]
+                      }
+                    }
+                  }
+                },
+                "ACTION_239": {
+                  "foreach": "@body('ACTION_143')",
+                  "actions": {
+                    "ACTION_255": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "source": "SOURCE_ID_001",
+                          "drive": "DRIVE_ID_001",
+                          "file": "FILE_ID_001",
+                          "table": "TABLE_ID_001",
+                          "idColumn": "Index",
+                          "id": "@items('ACTION_239')['Index']",
+                          "item/START_DATE": "@formatDateTime(parseDateTime(split(body('ACTION_222'), '.')[0]), 'MM/dd/yyyy', 'en-US')"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+                          "connectionName": "CONNECTION_NAME_002",
+                          "operationId": "PatchItem"
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    },
+                    "ACTION_265": {
+                      "runAfter": {
+                        "ACTION_255": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "AppendToStringVariable",
+                      "inputs": {
+                        "name": "filename",
+                        "value": "@{outputs('ACTION_122')?['body/Name']} \\n"
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "ACTION_143": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Foreach"
+                },
+                "ACTION_204": {
+                  "actions": {
+                    "ACTION_069": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "path": "@outputs('ACTION_122')?['body/Path']",
+                          "type": "View",
+                          "dataset_02": "Anonymous"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness",
+                          "connectionName": "CONNECTION_NAME_001",
+                          "operationId": "CreateShareLinkByPathV2"
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    },
+                    "ACTION_008": {
+                      "runAfter": {
+                        "ACTION_069": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "AppendToStringVariable",
+                      "inputs": {
+                        "name": "link",
+                        "value": "<p>REPORT_CONTENT</p>"
+                      }
+                    },
+                    "ACTION_128": {
+                      "runAfter": {
+                        "ACTION_008": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "IncrementVariable",
+                      "inputs": {
+                        "name": "linkcount",
+                        "value": 1
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "ACTION_239": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Scope"
+                }
+              },
+              "runAfter": {
+                "ACTION_151": [
+                  "Succeeded"
+                ]
+              },
+              "else": {
+                "actions": {
+                  "ACTION_052": {
+                    "actions": {
+                      "ACTION_104": {
+                        "type": "Query",
+                        "inputs": {
+                          "from": "@outputs('ACTION_151')?['body/value']",
+                          "where": "@not(equals(item()?['Status'], 'DONE'))"
+                        }
+                      },
+                      "ACTION_147": {
+                        "runAfter": {
+                          "ACTION_104": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "ParseJson",
+                        "inputs": {
+                          "content": "@body('ACTION_104')",
+                          "schema": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "@@odata.etag": {
+                                  "type": "string"
+                                },
+                                "ItemInternalId": {
+                                  "type": "string"
+                                },
+                                "Project": {
+                                  "type": "string"
+                                },
+                                "MAIN_TASK": {
+                                  "type": "string"
+                                },
+                                "SUBTASK": {
+                                  "type": "string"
+                                },
+                                "CHILDTASK": {
+                                  "type": "string"
+                                },
+                                "ACTION_084": {
+                                  "type": "string"
+                                },
+                                "START_DATE": {
+                                  "type": "string"
+                                },
+                                "END_DATE": {
+                                  "type": "string"
+                                },
+                                "Status": {
+                                  "type": "string"
+                                },
+                                "Year": {
+                                  "type": "string"
+                                },
+                                "Month": {
+                                  "type": "string"
+                                },
+                                "TYPE": {
+                                  "type": "string"
+                                },
+                                "Helper": {
+                                  "type": "string"
+                                },
+                                "Month_Data": {
+                                  "type": "string"
+                                },
+                                "Index": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "@@odata.etag",
+                                "ItemInternalId",
+                                "Project",
+                                "MAIN_TASK",
+                                "SUBTASK",
+                                "CHILDTASK",
+                                "Filename",
+                                "START_DATE",
+                                "END_DATE",
+                                "Status",
+                                "Year",
+                                "Month",
+                                "TYPE",
+                                "Helper",
+                                "Month_Data",
+                                "Index"
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "ACTION_100": {
+                        "runAfter": {
+                          "ACTION_147": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "Query",
+                        "inputs": {
+                          "from": "@body('ACTION_147')",
+                          "where": "@equals(item()['Project'], 'PRICE')"
+                        }
+                      },
+                      "ACTION_142": {
+                        "runAfter": {
+                          "ACTION_100": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "ParseJson",
+                        "inputs": {
+                          "content": "@body('ACTION_100')",
+                          "schema": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "@@odata.etag": {
+                                  "type": "string"
+                                },
+                                "ItemInternalId": {
+                                  "type": "string"
+                                },
+                                "Project": {
+                                  "type": "string"
+                                },
+                                "MAIN_TASK": {
+                                  "type": "string"
+                                },
+                                "SUBTASK": {
+                                  "type": "string"
+                                },
+                                "CHILDTASK": {
+                                  "type": "string"
+                                },
+                                "ACTION_084": {
+                                  "type": "string"
+                                },
+                                "START_DATE": {
+                                  "type": "string"
+                                },
+                                "END_DATE": {
+                                  "type": "string"
+                                },
+                                "Status": {
+                                  "type": "string"
+                                },
+                                "Year": {
+                                  "type": "string"
+                                },
+                                "Month": {
+                                  "type": "string"
+                                },
+                                "TYPE": {
+                                  "type": "string"
+                                },
+                                "Helper": {
+                                  "type": "string"
+                                },
+                                "Month_Data": {
+                                  "type": "string"
+                                },
+                                "Index": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "@@odata.etag",
+                                "ItemInternalId",
+                                "Project",
+                                "MAIN_TASK",
+                                "SUBTASK",
+                                "CHILDTASK",
+                                "Filename",
+                                "START_DATE",
+                                "END_DATE",
+                                "Status",
+                                "Year",
+                                "Month",
+                                "TYPE",
+                                "Helper",
+                                "Month_Data",
+                                "Index"
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "ACTION_087": {
+                        "runAfter": {
+                          "ACTION_142": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "Query",
+                        "inputs": {
+                          "from": "@body('ACTION_142')",
+                          "where": "@contains(outputs('ACTION_114'), item()['ACTION_084'])"
+                        }
+                      },
+                      "ACTION_146": {
+                        "runAfter": {
+                          "ACTION_087": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "ParseJson",
+                        "inputs": {
+                          "content": "@body('ACTION_087')",
+                          "schema": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "@@odata.etag": {
+                                  "type": "string"
+                                },
+                                "ItemInternalId": {
+                                  "type": "string"
+                                },
+                                "Project": {
+                                  "type": "string"
+                                },
+                                "MAIN_TASK": {
+                                  "type": "string"
+                                },
+                                "SUBTASK": {
+                                  "type": "string"
+                                },
+                                "CHILDTASK": {
+                                  "type": "string"
+                                },
+                                "ACTION_084": {
+                                  "type": "string"
+                                },
+                                "START_DATE": {
+                                  "type": "string"
+                                },
+                                "END_DATE": {
+                                  "type": "string"
+                                },
+                                "Status": {
+                                  "type": "string"
+                                },
+                                "Year": {
+                                  "type": "string"
+                                },
+                                "Month": {
+                                  "type": "string"
+                                },
+                                "TYPE": {
+                                  "type": "string"
+                                },
+                                "Helper": {
+                                  "type": "string"
+                                },
+                                "Month_Data": {
+                                  "type": "string"
+                                },
+                                "Index": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "@@odata.etag",
+                                "ItemInternalId",
+                                "Project",
+                                "MAIN_TASK",
+                                "SUBTASK",
+                                "CHILDTASK",
+                                "Filename",
+                                "START_DATE",
+                                "END_DATE",
+                                "Status",
+                                "Year",
+                                "Month",
+                                "TYPE",
+                                "Helper",
+                                "Month_Data",
+                                "Index"
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "ACTION_240": {
+                        "foreach": "@body('ACTION_146')",
+                        "actions": {
+                          "ACTION_256": {
+                            "type": "OpenApiConnection",
+                            "inputs": {
+                              "parameters": {
+                                "source": "SOURCE_ID_001",
+                                "drive": "DRIVE_ID_001",
+                                "file": "FILE_ID_001",
+                                "table": "TABLE_ID_001",
+                                "idColumn": "Index",
+                                "id": "@items('ACTION_240')['Index']",
+                                "item/START_DATE": "@formatDateTime(parseDateTime(split(body('ACTION_222'), '.')[0]), 'MM/dd/yyyy', 'en-US')"
+                              },
+                              "host": {
+                                "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+                                "connectionName": "CONNECTION_NAME_002",
+                                "operationId": "PatchItem"
+                              },
+                              "authentication": "@parameters('$authentication')"
+                            }
+                          },
+                          "ACTION_267": {
+                            "runAfter": {
+                              "ACTION_256": [
+                                "Succeeded"
+                              ]
+                            },
+                            "type": "AppendToStringVariable",
+                            "inputs": {
+                              "name": "filename",
+                              "value": "@{outputs('ACTION_122')?['body/Name']} \\n"
+                            }
+                          }
+                        },
+                        "runAfter": {
+                          "ACTION_146": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "Foreach"
+                      },
+                      "ACTION_205": {
+                        "actions": {
+                          "ACTION_070": {
+                            "type": "OpenApiConnection",
+                            "inputs": {
+                              "parameters": {
+                                "path": "@outputs('ACTION_122')?['body/Path']",
+                                "type": "View",
+                                "dataset_02": "Anonymous"
+                              },
+                              "host": {
+                                "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness",
+                                "connectionName": "CONNECTION_NAME_001",
+                                "operationId": "CreateShareLinkByPathV2"
+                              },
+                              "authentication": "@parameters('$authentication')"
+                            }
+                          },
+                          "ACTION_009": {
+                            "runAfter": {
+                              "ACTION_070": [
+                                "Succeeded"
+                              ]
+                            },
+                            "type": "AppendToStringVariable",
+                            "inputs": {
+                              "name": "link",
+                              "value": "<p>REPORT_CONTENT</p>"
+                            }
+                          },
+                          "ACTION_129": {
+                            "runAfter": {
+                              "ACTION_009": [
+                                "Succeeded"
+                              ]
+                            },
+                            "type": "IncrementVariable",
+                            "inputs": {
+                              "name": "linkcount",
+                              "value": 1
+                            }
+                          }
+                        },
+                        "runAfter": {
+                          "ACTION_240": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "Scope"
+                      }
+                    },
+                    "else": {
+                      "actions": {}
+                    },
+                    "expression": {
+                      "or": [
+                        {
+                          "equals": [
+                            "@outputs('ACTION_115')",
+                            "PRICE BY DEALER"
+                          ]
+                        },
+                        {
+                          "equals": [
+                            "@outputs('ACTION_115')",
+                            "PRICE DISCOUNT"
+                          ]
+                        }
+                      ]
+                    },
+                    "type": "If"
+                  }
+                }
+              },
+              "expression": {
+                "and": [
+                  {
+                    "contains": [
+                      "@outputs('ACTION_186')",
+                      "Price"
+                    ]
+                  },
+                  {
+                    "or": [
+                      {
+                        "equals": [
+                          "@outputs('ACTION_115')",
+                          "PRICE COMPETITOR"
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@outputs('ACTION_115')",
+                          "PRICE COMPANY_NAME"
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@outputs('ACTION_115')",
+                          "PRICE COMPANY_NAME"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "type": "If"
+            },
+            "ACTION_148": {
+              "runAfter": {
+                "ACTION_021": [
+                  "Succeeded"
+                ]
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "source": "SOURCE_ID_001",
+                  "drive": "DRIVE_ID_001",
+                  "file": "FILE_ID_001",
+                  "table": "TABLE_ID_001",
+                  "$filter": "Project eq '@{outputs('ACTION_186')}'",
+                  "$top": 60000,
+                  "$select": "Project,Filename,Start_date,Month_Data,Index"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+                  "connectionName": "CONNECTION_NAME_004",
+                  "operationId": "GetItems"
+                },
+                "authentication": "@parameters('$authentication')"
+              }
+            },
+            "ACTION_258": {
+              "actions": {
+                "ACTION_160": {
+                  "type": "Compose",
+                  "inputs": "@split(outputs('ACTION_122')?['body/Path'], '/')[4]",
+                  "description": "Example Output : 10 Oct"
+                },
+                "ACTION_099": {
+                  "runAfter": {
+                    "ACTION_160": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Query",
+                  "inputs": {
+                    "from": "@outputs('ACTION_148')?['body/value']",
+                    "where": "@equals(item()?['Month_Data'], outputs('ACTION_160'))"
+                  }
+                },
+                "ACTION_141": {
+                  "runAfter": {
+                    "ACTION_099": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ParseJson",
+                  "inputs": {
+                    "content": "@body('ACTION_099')",
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "@@odata.etag": {
+                            "type": "string"
+                          },
+                          "ItemInternalId": {
+                            "type": "string"
+                          },
+                          "Project": {
+                            "type": "string"
+                          },
+                          "ACTION_084": {
+                            "type": "string"
+                          },
+                          "START_DATE": {
+                            "type": "string"
+                          },
+                          "Month_Data": {
+                            "type": "string"
+                          },
+                          "Index": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "@@odata.etag",
+                          "ItemInternalId",
+                          "Project",
+                          "Filename",
+                          "START_DATE",
+                          "Month_Data",
+                          "Index"
+                        ]
+                      }
+                    }
+                  }
+                },
+                "ACTION_089": {
+                  "runAfter": {
+                    "ACTION_141": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Query",
+                  "inputs": {
+                    "from": "@body('ACTION_141')",
+                    "where": "@startsWith(outputs('ACTION_114'), item()['ACTION_084'])"
+                  }
+                },
+                "ACTION_248": {
+                  "foreach": "@body('ACTION_163')",
+                  "actions": {
+                    "ACTION_247": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "source": "SOURCE_ID_001",
+                          "drive": "DRIVE_ID_001",
+                          "file": "FILE_ID_001",
+                          "table": "TABLE_ID_001",
+                          "idColumn": "Index",
+                          "id": "@items('ACTION_248')['Index']",
+                          "item/START_DATE": "@formatDateTime(parseDateTime(split(body('ACTION_222'), '.')[0]), 'MM/dd/yyyy', 'en-US')"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+                          "connectionName": "CONNECTION_NAME_004",
+                          "operationId": "PatchItem"
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "ACTION_208": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Foreach",
+                  "runtimeConfiguration": {
+                    "concurrency": {
+                      "repetitions": 50
+                    }
+                  }
+                },
+                "ACTION_163": {
+                  "runAfter": {
+                    "ACTION_089": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ParseJson",
+                  "inputs": {
+                    "content": "@body('ACTION_089')",
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "@@odata.etag": {
+                            "type": "string"
+                          },
+                          "ItemInternalId": {
+                            "type": "string"
+                          },
+                          "Project": {
+                            "type": "string"
+                          },
+                          "ACTION_084": {
+                            "type": "string"
+                          },
+                          "START_DATE": {
+                            "type": "string"
+                          },
+                          "Month_Data": {
+                            "type": "string"
+                          },
+                          "Index": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "@@odata.etag",
+                          "ItemInternalId",
+                          "Project",
+                          "Filename",
+                          "START_DATE",
+                          "Month_Data",
+                          "Index"
+                        ]
+                      }
+                    }
+                  }
+                },
+                "ACTION_191": {
+                  "runAfter": {
+                    "ACTION_130": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "project_name",
+                    "value": "WS RS Competitor"
+                  }
+                },
+                "ACTION_130": {
+                  "runAfter": {
+                    "ACTION_248": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "IncrementVariable",
+                  "inputs": {
+                    "name": "linkcount",
+                    "value": 1
+                  }
+                },
+                "ACTION_208": {
+                  "actions": {
+                    "ACTION_072": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "path": "@outputs('ACTION_122')?['body/Path']",
+                          "type": "View",
+                          "dataset_02": "Anonymous"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness",
+                          "connectionName": "CONNECTION_NAME_001",
+                          "operationId": "CreateShareLinkByPathV2"
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    },
+                    "ACTION_020": {
+                      "runAfter": {
+                        "ACTION_072": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "AppendToArrayVariable",
+                      "inputs": {
+                        "name": "arrayAttachment",
+                        "value": {
+                          "Name": "@outputs('ACTION_122')?['body/Name']",
+                          "Link": "@outputs('ACTION_072')?['body/WebUrl']"
+                        }
+                      }
+                    },
+                    "ACTION_011": {
+                      "runAfter": {
+                        "ACTION_020": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "AppendToStringVariable",
+                      "inputs": {
+                        "name": "link",
+                        "value": "<p>REPORT_CONTENT</p>"
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "ACTION_163": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Scope"
+                }
+              },
+              "runAfter": {
+                "ACTION_148": [
+                  "Succeeded"
+                ]
+              },
+              "else": {
+                "actions": {}
+              },
+              "expression": {
+                "equals": [
+                  "@outputs('ACTION_186')",
+                  "WS RS Competitor"
+                ]
+              },
+              "type": "If"
+            },
+            "ACTION_185": {
+              "actions": {
+                "ACTION_103": {
+                  "type": "Query",
+                  "inputs": {
+                    "from": "@outputs('ACTION_151')?['body/value']",
+                    "where": "@not(equals(item()?['Status'], 'DONE'))"
+                  }
+                },
+                "ACTION_136": {
+                  "runAfter": {
+                    "ACTION_103": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ParseJson",
+                  "inputs": {
+                    "content": "@body('ACTION_103')",
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "@@odata.etag": {
+                            "type": "string"
+                          },
+                          "ItemInternalId": {
+                            "type": "string"
+                          },
+                          "Project": {
+                            "type": "string"
+                          },
+                          "MAIN_TASK": {
+                            "type": "string"
+                          },
+                          "SUBTASK": {
+                            "type": "string"
+                          },
+                          "CHILDTASK": {
+                            "type": "string"
+                          },
+                          "ACTION_084": {
+                            "type": "string"
+                          },
+                          "START_DATE": {
+                            "type": "string"
+                          },
+                          "END_DATE": {
+                            "type": "string"
+                          },
+                          "Status": {
+                            "type": "string"
+                          },
+                          "Year": {
+                            "type": "string"
+                          },
+                          "Month": {
+                            "type": "string"
+                          },
+                          "TYPE": {
+                            "type": "string"
+                          },
+                          "Helper": {
+                            "type": "string"
+                          },
+                          "Month_Data": {
+                            "type": "string"
+                          },
+                          "Index": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "@@odata.etag",
+                          "ItemInternalId",
+                          "Project",
+                          "MAIN_TASK",
+                          "SUBTASK",
+                          "CHILDTASK",
+                          "Filename",
+                          "START_DATE",
+                          "END_DATE",
+                          "Status",
+                          "Year",
+                          "Month",
+                          "TYPE",
+                          "Helper",
+                          "Month_Data",
+                          "Index"
+                        ]
+                      }
+                    }
+                  }
+                },
+                "ACTION_092": {
+                  "runAfter": {
+                    "ACTION_136": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Query",
+                  "inputs": {
+                    "from": "@body('ACTION_136')",
+                    "where": "@contains(item()['MAIN_TASK'], outputs('ACTION_115'))"
+                  }
+                },
+                "ACTION_135": {
+                  "runAfter": {
+                    "ACTION_092": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ParseJson",
+                  "inputs": {
+                    "content": "@body('ACTION_092')",
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "@@odata.etag": {
+                            "type": "string"
+                          },
+                          "ItemInternalId": {
+                            "type": "string"
+                          },
+                          "Project": {
+                            "type": "string"
+                          },
+                          "MAIN_TASK": {
+                            "type": "string"
+                          },
+                          "SUBTASK": {
+                            "type": "string"
+                          },
+                          "CHILDTASK": {
+                            "type": "string"
+                          },
+                          "ACTION_084": {
+                            "type": "string"
+                          },
+                          "START_DATE": {
+                            "type": "string"
+                          },
+                          "END_DATE": {
+                            "type": "string"
+                          },
+                          "Status": {
+                            "type": "string"
+                          },
+                          "Year": {
+                            "type": "string"
+                          },
+                          "Month": {
+                            "type": "string"
+                          },
+                          "TYPE": {
+                            "type": "string"
+                          },
+                          "Helper": {
+                            "type": "string"
+                          },
+                          "Month_Data": {
+                            "type": "string"
+                          },
+                          "Index": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "@@odata.etag",
+                          "ItemInternalId",
+                          "Project",
+                          "MAIN_TASK",
+                          "SUBTASK",
+                          "CHILDTASK",
+                          "Filename",
+                          "START_DATE",
+                          "END_DATE",
+                          "Status",
+                          "Year",
+                          "Month",
+                          "TYPE",
+                          "Helper",
+                          "Month_Data",
+                          "Index"
+                        ]
+                      }
+                    }
+                  }
+                },
+                "ACTION_237": {
+                  "foreach": "@body('ACTION_135')",
+                  "actions": {
+                    "ACTION_244": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "source": "SOURCE_ID_001",
+                          "drive": "DRIVE_ID_001",
+                          "file": "FILE_ID_001",
+                          "table": "TABLE_ID_001",
+                          "idColumn": "Index",
+                          "id": "@items('ACTION_237')['Index']",
+                          "item/START_DATE": "@formatDateTime(parseDateTime(split(body('ACTION_222'), '.')[0]), 'MM/dd/yyyy', 'en-US')"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+                          "connectionName": "CONNECTION_NAME_004",
+                          "operationId": "PatchItem"
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "ACTION_135": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Foreach"
+                },
+                "ACTION_202": {
+                  "actions": {
+                    "ACTION_067": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "path": "@outputs('ACTION_122')?['body/Path']",
+                          "type": "View",
+                          "dataset_02": "Anonymous"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness",
+                          "connectionName": "CONNECTION_NAME_001",
+                          "operationId": "CreateShareLinkByPathV2"
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    },
+                    "ACTION_006": {
+                      "runAfter": {
+                        "ACTION_067": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "AppendToStringVariable",
+                      "inputs": {
+                        "name": "link",
+                        "value": "<p>REPORT_CONTENT</p>"
+                      }
+                    },
+                    "ACTION_126": {
+                      "runAfter": {
+                        "ACTION_006": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "IncrementVariable",
+                      "inputs": {
+                        "name": "linkcount",
+                        "value": 1
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "ACTION_237": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Scope"
+                }
+              },
+              "runAfter": {
+                "ACTION_151": [
+                  "Succeeded"
+                ]
+              },
+              "else": {
+                "actions": {
+                  "ACTION_053": {
+                    "actions": {
+                      "ACTION_105": {
+                        "type": "Query",
+                        "inputs": {
+                          "from": "@outputs('ACTION_151')?['body/value']",
+                          "where": "@not(equals(item()?['Status'], 'DONE'))"
+                        }
+                      },
+                      "ACTION_137": {
+                        "runAfter": {
+                          "ACTION_105": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "ParseJson",
+                        "inputs": {
+                          "content": "@body('ACTION_105')",
+                          "schema": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "@@odata.etag": {
+                                  "type": "string"
+                                },
+                                "ItemInternalId": {
+                                  "type": "string"
+                                },
+                                "Project": {
+                                  "type": "string"
+                                },
+                                "MAIN_TASK": {
+                                  "type": "string"
+                                },
+                                "SUBTASK": {
+                                  "type": "string"
+                                },
+                                "CHILDTASK": {
+                                  "type": "string"
+                                },
+                                "ACTION_084": {
+                                  "type": "string"
+                                },
+                                "START_DATE": {
+                                  "type": "string"
+                                },
+                                "END_DATE": {
+                                  "type": "string"
+                                },
+                                "Status": {
+                                  "type": "string"
+                                },
+                                "Year": {
+                                  "type": "string"
+                                },
+                                "Month": {
+                                  "type": "string"
+                                },
+                                "TYPE": {
+                                  "type": "string"
+                                },
+                                "Helper": {
+                                  "type": "string"
+                                },
+                                "Month_Data": {
+                                  "type": "string"
+                                },
+                                "Index": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "@@odata.etag",
+                                "ItemInternalId",
+                                "Project",
+                                "MAIN_TASK",
+                                "SUBTASK",
+                                "CHILDTASK",
+                                "Filename",
+                                "START_DATE",
+                                "END_DATE",
+                                "Status",
+                                "Year",
+                                "Month",
+                                "TYPE",
+                                "Helper",
+                                "Month_Data",
+                                "Index"
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "ACTION_093": {
+                        "runAfter": {
+                          "ACTION_137": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "Query",
+                        "inputs": {
+                          "from": "@body('ACTION_137')",
+                          "where": "@equals(item()['MAIN_TASK'], outputs('ACTION_115'))"
+                        }
+                      },
+                      "ACTION_145": {
+                        "runAfter": {
+                          "ACTION_093": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "ParseJson",
+                        "inputs": {
+                          "content": "@body('ACTION_093')",
+                          "schema": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "@@odata.etag": {
+                                  "type": "string"
+                                },
+                                "ItemInternalId": {
+                                  "type": "string"
+                                },
+                                "Project": {
+                                  "type": "string"
+                                },
+                                "MAIN_TASK": {
+                                  "type": "string"
+                                },
+                                "SUBTASK": {
+                                  "type": "string"
+                                },
+                                "CHILDTASK": {
+                                  "type": "string"
+                                },
+                                "ACTION_084": {
+                                  "type": "string"
+                                },
+                                "START_DATE": {
+                                  "type": "string"
+                                },
+                                "END_DATE": {
+                                  "type": "string"
+                                },
+                                "Status": {
+                                  "type": "string"
+                                },
+                                "Year": {
+                                  "type": "string"
+                                },
+                                "Month": {
+                                  "type": "string"
+                                },
+                                "TYPE": {
+                                  "type": "string"
+                                },
+                                "Helper": {
+                                  "type": "string"
+                                },
+                                "Month_Data": {
+                                  "type": "string"
+                                },
+                                "Index": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "@@odata.etag",
+                                "ItemInternalId",
+                                "Project",
+                                "MAIN_TASK",
+                                "SUBTASK",
+                                "CHILDTASK",
+                                "Filename",
+                                "START_DATE",
+                                "END_DATE",
+                                "Status",
+                                "Year",
+                                "Month",
+                                "TYPE",
+                                "Helper",
+                                "Month_Data",
+                                "Index"
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "ACTION_241": {
+                        "foreach": "@body('ACTION_145')",
+                        "actions": {
+                          "ACTION_257": {
+                            "type": "OpenApiConnection",
+                            "inputs": {
+                              "parameters": {
+                                "source": "SOURCE_ID_001",
+                                "drive": "DRIVE_ID_001",
+                                "file": "FILE_ID_001",
+                                "table": "TABLE_ID_001",
+                                "idColumn": "Index",
+                                "id": "@items('ACTION_241')['Index']",
+                                "item/START_DATE": "@formatDateTime(parseDateTime(split(body('ACTION_222'), '.')[0]), 'MM/dd/yyyy', 'en-US')"
+                              },
+                              "host": {
+                                "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+                                "connectionName": "CONNECTION_NAME_004",
+                                "operationId": "PatchItem"
+                              },
+                              "authentication": "@parameters('$authentication')"
+                            }
+                          }
+                        },
+                        "runAfter": {
+                          "ACTION_145": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "Foreach"
+                      },
+                      "ACTION_203": {
+                        "actions": {
+                          "ACTION_068": {
+                            "type": "OpenApiConnection",
+                            "inputs": {
+                              "parameters": {
+                                "path": "@outputs('ACTION_122')?['body/Path']",
+                                "type": "View",
+                                "dataset_02": "Anonymous"
+                              },
+                              "host": {
+                                "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness",
+                                "connectionName": "CONNECTION_NAME_001",
+                                "operationId": "CreateShareLinkByPathV2"
+                              },
+                              "authentication": "@parameters('$authentication')"
+                            }
+                          },
+                          "ACTION_007": {
+                            "runAfter": {
+                              "ACTION_068": [
+                                "Succeeded"
+                              ]
+                            },
+                            "type": "AppendToStringVariable",
+                            "inputs": {
+                              "name": "link",
+                              "value": "<p>REPORT_CONTENT</p>"
+                            }
+                          },
+                          "ACTION_127": {
+                            "runAfter": {
+                              "ACTION_007": [
+                                "Succeeded"
+                              ]
+                            },
+                            "type": "IncrementVariable",
+                            "inputs": {
+                              "name": "linkcount",
+                              "value": 1
+                            }
+                          }
+                        },
+                        "runAfter": {
+                          "ACTION_241": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "Scope"
+                      }
+                    },
+                    "else": {
+                      "actions": {}
+                    },
+                    "expression": {
+                      "equals": [
+                        "@outputs('ACTION_115')",
+                        "Production, Export, Import All Makers"
+                      ]
+                    },
+                    "type": "If"
+                  }
+                }
+              },
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@outputs('ACTION_186')",
+                      "Production, Export, Import"
+                    ]
+                  },
+                  {
+                    "contains": [
+                      "@outputs('ACTION_115')",
+                      "CBU IMPORT COMPANY_NAME COMPANY_NAME"
+                    ]
+                  }
+                ]
+              },
+              "type": "If"
+            },
+            "ACTION_264": {
+              "actions": {
+                "ACTION_108": {
+                  "type": "Query",
+                  "inputs": {
+                    "from": "@outputs('ACTION_151')?['body/value']",
+                    "where": "@not(equals(item()?['Status'], 'DONE'))"
+                  }
+                },
+                "ACTION_140": {
+                  "runAfter": {
+                    "ACTION_108": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ParseJson",
+                  "inputs": {
+                    "content": "@body('ACTION_108')",
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "@@odata.etag": {
+                            "type": "string"
+                          },
+                          "ItemInternalId": {
+                            "type": "string"
+                          },
+                          "Project": {
+                            "type": "string"
+                          },
+                          "MAIN_TASK": {
+                            "type": "string"
+                          },
+                          "SUBTASK": {
+                            "type": "string"
+                          },
+                          "CHILDTASK": {
+                            "type": "string"
+                          },
+                          "ACTION_084": {
+                            "type": "string"
+                          },
+                          "START_DATE": {
+                            "type": "string"
+                          },
+                          "END_DATE": {
+                            "type": "string"
+                          },
+                          "Status": {
+                            "type": "string"
+                          },
+                          "Year": {
+                            "type": "string"
+                          },
+                          "Month": {
+                            "type": "string"
+                          },
+                          "TYPE": {
+                            "type": "string"
+                          },
+                          "Helper": {
+                            "type": "string"
+                          },
+                          "Month_Data": {
+                            "type": "string"
+                          },
+                          "Index": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "@@odata.etag",
+                          "ItemInternalId",
+                          "Project",
+                          "MAIN_TASK",
+                          "SUBTASK",
+                          "CHILDTASK",
+                          "Filename",
+                          "START_DATE",
+                          "END_DATE",
+                          "Status",
+                          "Year",
+                          "Month",
+                          "TYPE",
+                          "Helper",
+                          "Month_Data",
+                          "Index"
+                        ]
+                      }
+                    }
+                  }
+                },
+                "ACTION_091": {
+                  "runAfter": {
+                    "ACTION_140": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Query",
+                  "inputs": {
+                    "from": "@body('ACTION_140')",
+                    "where": "@contains(item()['MAIN_TASK'], outputs('ACTION_115'))"
+                  }
+                },
+                "ACTION_144": {
+                  "runAfter": {
+                    "ACTION_091": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ParseJson",
+                  "inputs": {
+                    "content": "@body('ACTION_091')",
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "@@odata.etag": {
+                            "type": "string"
+                          },
+                          "ItemInternalId": {
+                            "type": "string"
+                          },
+                          "Project": {
+                            "type": "string"
+                          },
+                          "MAIN_TASK": {
+                            "type": "string"
+                          },
+                          "SUBTASK": {
+                            "type": "string"
+                          },
+                          "CHILDTASK": {
+                            "type": "string"
+                          },
+                          "ACTION_084": {
+                            "type": "string"
+                          },
+                          "START_DATE": {
+                            "type": "string"
+                          },
+                          "END_DATE": {
+                            "type": "string"
+                          },
+                          "Status": {
+                            "type": "string"
+                          },
+                          "Year": {
+                            "type": "string"
+                          },
+                          "Month": {
+                            "type": "string"
+                          },
+                          "TYPE": {
+                            "type": "string"
+                          },
+                          "Helper": {
+                            "type": "string"
+                          },
+                          "Month_Data": {
+                            "type": "string"
+                          },
+                          "Index": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "@@odata.etag",
+                          "ItemInternalId",
+                          "Project",
+                          "MAIN_TASK",
+                          "SUBTASK",
+                          "CHILDTASK",
+                          "Filename",
+                          "START_DATE",
+                          "END_DATE",
+                          "Status",
+                          "Year",
+                          "Month",
+                          "TYPE",
+                          "Helper",
+                          "Month_Data",
+                          "Index"
+                        ]
+                      }
+                    }
+                  }
+                },
+                "ACTION_154": {
+                  "foreach": "@body('ACTION_144')",
+                  "actions": {
+                    "ACTION_246": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "source": "SOURCE_ID_001",
+                          "drive": "DRIVE_ID_001",
+                          "file": "FILE_ID_001",
+                          "table": "TABLE_ID_001",
+                          "idColumn": "Index",
+                          "id": "@items('ACTION_154')['Index']",
+                          "item/START_DATE": "@formatDateTime(parseDateTime(split(body('ACTION_222'), '.')[0]), 'MM/dd/yyyy', 'en-US')"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+                          "connectionName": "CONNECTION_NAME_004",
+                          "operationId": "PatchItem"
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "ACTION_144": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Foreach"
+                },
+                "ACTION_209": {
+                  "actions": {
+                    "ACTION_074": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "path": "@outputs('ACTION_122')?['body/Path']",
+                          "type": "View",
+                          "dataset_02": "Anonymous"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness",
+                          "connectionName": "CONNECTION_NAME_001",
+                          "operationId": "CreateShareLinkByPathV2"
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    },
+                    "ACTION_013": {
+                      "runAfter": {
+                        "ACTION_074": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "AppendToStringVariable",
+                      "inputs": {
+                        "name": "link",
+                        "value": "<p>REPORT_CONTENT</p>"
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "ACTION_154": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Scope"
+                },
+                "ACTION_181": {
+                  "runAfter": {
+                    "ACTION_209": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "poster": "User",
+                      "location": "LOCATION_001",
+                      "body/recipient/groupId": "GROUP_ID_001",
+                      "body/recipient/channelId": "CHANNEL_ID_001",
+                      "body/messageBody": "<p>REPORT_CONTENT</p>",
+                      "body/subject": "Data @{outputs('ACTION_186')} - @{outputs('ACTION_115')}"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
+                      "connectionName": "CONNECTION_NAME_005",
+                      "operationId": "PostMessageToConversation"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                }
+              },
+              "runAfter": {
+                "ACTION_151": [
+                  "Succeeded"
+                ]
+              },
+              "else": {
+                "actions": {
+                  "ACTION_051": {
+                    "actions": {
+                      "ACTION_106": {
+                        "type": "Query",
+                        "inputs": {
+                          "from": "@outputs('ACTION_151')?['body/value']",
+                          "where": "@not(equals(item()?['Status'], 'DONE'))"
+                        }
+                      },
+                      "ACTION_138": {
+                        "runAfter": {
+                          "ACTION_106": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "ParseJson",
+                        "inputs": {
+                          "content": "@body('ACTION_106')",
+                          "schema": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "@@odata.etag": {
+                                  "type": "string"
+                                },
+                                "ItemInternalId": {
+                                  "type": "string"
+                                },
+                                "Project": {
+                                  "type": "string"
+                                },
+                                "MAIN_TASK": {
+                                  "type": "string"
+                                },
+                                "SUBTASK": {
+                                  "type": "string"
+                                },
+                                "CHILDTASK": {
+                                  "type": "string"
+                                },
+                                "ACTION_084": {
+                                  "type": "string"
+                                },
+                                "START_DATE": {
+                                  "type": "string"
+                                },
+                                "END_DATE": {
+                                  "type": "string"
+                                },
+                                "Status": {
+                                  "type": "string"
+                                },
+                                "Year": {
+                                  "type": "string"
+                                },
+                                "Month": {
+                                  "type": "string"
+                                },
+                                "TYPE": {
+                                  "type": "string"
+                                },
+                                "Helper": {
+                                  "type": "string"
+                                },
+                                "Month_Data": {
+                                  "type": "string"
+                                },
+                                "Index": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "@@odata.etag",
+                                "ItemInternalId",
+                                "Project",
+                                "MAIN_TASK",
+                                "SUBTASK",
+                                "CHILDTASK",
+                                "Filename",
+                                "START_DATE",
+                                "END_DATE",
+                                "Status",
+                                "Year",
+                                "Month",
+                                "TYPE",
+                                "Helper",
+                                "Month_Data",
+                                "Index"
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "ACTION_090": {
+                        "runAfter": {
+                          "ACTION_138": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "Query",
+                        "inputs": {
+                          "from": "@body('ACTION_138')",
+                          "where": "@contains(item()['MAIN_TASK'], outputs('ACTION_115'))"
+                        }
+                      },
+                      "ACTION_134": {
+                        "runAfter": {
+                          "ACTION_090": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "ParseJson",
+                        "inputs": {
+                          "content": "@body('ACTION_090')",
+                          "schema": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "@@odata.etag": {
+                                  "type": "string"
+                                },
+                                "ItemInternalId": {
+                                  "type": "string"
+                                },
+                                "Project": {
+                                  "type": "string"
+                                },
+                                "MAIN_TASK": {
+                                  "type": "string"
+                                },
+                                "SUBTASK": {
+                                  "type": "string"
+                                },
+                                "CHILDTASK": {
+                                  "type": "string"
+                                },
+                                "ACTION_084": {
+                                  "type": "string"
+                                },
+                                "START_DATE": {
+                                  "type": "string"
+                                },
+                                "END_DATE": {
+                                  "type": "string"
+                                },
+                                "Status": {
+                                  "type": "string"
+                                },
+                                "Year": {
+                                  "type": "string"
+                                },
+                                "Month": {
+                                  "type": "string"
+                                },
+                                "TYPE": {
+                                  "type": "string"
+                                },
+                                "Helper": {
+                                  "type": "string"
+                                },
+                                "Month_Data": {
+                                  "type": "string"
+                                },
+                                "Index": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "@@odata.etag",
+                                "ItemInternalId",
+                                "Project",
+                                "MAIN_TASK",
+                                "SUBTASK",
+                                "CHILDTASK",
+                                "Filename",
+                                "START_DATE",
+                                "END_DATE",
+                                "Status",
+                                "Year",
+                                "Month",
+                                "TYPE",
+                                "Helper",
+                                "Month_Data",
+                                "Index"
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "ACTION_153": {
+                        "foreach": "@body('ACTION_134')",
+                        "actions": {
+                          "ACTION_245": {
+                            "type": "OpenApiConnection",
+                            "inputs": {
+                              "parameters": {
+                                "source": "SOURCE_ID_001",
+                                "drive": "DRIVE_ID_001",
+                                "file": "FILE_ID_001",
+                                "table": "TABLE_ID_001",
+                                "idColumn": "Index",
+                                "id": "@items('ACTION_153')['Index']",
+                                "item/START_DATE": "@formatDateTime(parseDateTime(split(body('ACTION_222'), '.')[0]), 'MM/dd/yyyy', 'en-US')"
+                              },
+                              "host": {
+                                "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+                                "connectionName": "CONNECTION_NAME_004",
+                                "operationId": "PatchItem"
+                              },
+                              "authentication": "@parameters('$authentication')"
+                            }
+                          }
+                        },
+                        "runAfter": {
+                          "ACTION_134": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "Foreach"
+                      },
+                      "ACTION_206": {
+                        "actions": {
+                          "ACTION_075": {
+                            "type": "OpenApiConnection",
+                            "inputs": {
+                              "parameters": {
+                                "path": "@outputs('ACTION_122')?['body/Path']",
+                                "type": "View",
+                                "dataset_02": "Anonymous"
+                              },
+                              "host": {
+                                "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness",
+                                "connectionName": "CONNECTION_NAME_001",
+                                "operationId": "CreateShareLinkByPathV2"
+                              },
+                              "authentication": "@parameters('$authentication')"
+                            }
+                          },
+                          "ACTION_014": {
+                            "runAfter": {
+                              "ACTION_075": [
+                                "Succeeded"
+                              ]
+                            },
+                            "type": "AppendToStringVariable",
+                            "inputs": {
+                              "name": "link",
+                              "value": "<p>REPORT_CONTENT</p>"
+                            }
+                          }
+                        },
+                        "runAfter": {
+                          "ACTION_153": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "Scope"
+                      },
+                      "ACTION_179": {
+                        "runAfter": {
+                          "ACTION_206": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "OpenApiConnection",
+                        "inputs": {
+                          "parameters": {
+                            "poster": "User",
+                            "location": "LOCATION_001",
+                            "body/recipient/groupId": "GROUP_ID_001",
+                            "body/recipient/channelId": "CHANNEL_ID_001",
+                            "body/messageBody": "<p>REPORT_CONTENT</p>",
+                            "body/subject": "Data @{outputs('ACTION_186')} - @{outputs('ACTION_115')}"
+                          },
+                          "host": {
+                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
+                            "connectionName": "CONNECTION_NAME_005",
+                            "operationId": "PostMessageToConversation"
+                          },
+                          "authentication": "@parameters('$authentication')"
+                        }
+                      }
+                    },
+                    "else": {
+                      "actions": {}
+                    },
+                    "expression": {
+                      "equals": [
+                        "@outputs('ACTION_186')",
+                        "Retail Sales"
+                      ]
+                    },
+                    "type": "If"
+                  }
+                }
+              },
+              "expression": {
+                "equals": [
+                  "@outputs('ACTION_186')",
+                  "Whole Sales"
+                ]
+              },
+              "type": "If"
+            },
+            "ACTION_198": {
+              "actions": {
+                "ACTION_107": {
+                  "type": "Query",
+                  "inputs": {
+                    "from": "@outputs('ACTION_151')?['body/value']",
+                    "where": "@not(equals(item()?['Status'], 'DONE'))"
+                  }
+                },
+                "ACTION_139": {
+                  "runAfter": {
+                    "ACTION_107": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ParseJson",
+                  "inputs": {
+                    "content": "@body('ACTION_107')",
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "@@odata.etag": {
+                            "type": "string"
+                          },
+                          "ItemInternalId": {
+                            "type": "string"
+                          },
+                          "Project": {
+                            "type": "string"
+                          },
+                          "MAIN_TASK": {
+                            "type": "string"
+                          },
+                          "SUBTASK": {
+                            "type": "string"
+                          },
+                          "CHILDTASK": {
+                            "type": "string"
+                          },
+                          "ACTION_084": {
+                            "type": "string"
+                          },
+                          "START_DATE": {
+                            "type": "string"
+                          },
+                          "END_DATE": {
+                            "type": "string"
+                          },
+                          "Status": {
+                            "type": "string"
+                          },
+                          "Year": {
+                            "type": "string"
+                          },
+                          "Month": {
+                            "type": "string"
+                          },
+                          "TYPE": {
+                            "type": "string"
+                          },
+                          "Helper": {
+                            "type": "string"
+                          },
+                          "Month_Data": {
+                            "type": "string"
+                          },
+                          "Index": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "@@odata.etag",
+                          "ItemInternalId",
+                          "Project",
+                          "MAIN_TASK",
+                          "SUBTASK",
+                          "CHILDTASK",
+                          "Filename",
+                          "START_DATE",
+                          "END_DATE",
+                          "Status",
+                          "Year",
+                          "Month",
+                          "TYPE",
+                          "Helper",
+                          "Month_Data",
+                          "Index"
+                        ]
+                      }
+                    }
+                  }
+                },
+                "ACTION_088": {
+                  "runAfter": {
+                    "ACTION_139": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Query",
+                  "inputs": {
+                    "from": "@body('ACTION_139')",
+                    "where": "@contains(outputs('ACTION_114'), '')"
+                  }
+                },
+                "ACTION_133": {
+                  "runAfter": {
+                    "ACTION_088": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ParseJson",
+                  "inputs": {
+                    "content": "@body('ACTION_088')",
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "@@odata.etag": {
+                            "type": "string"
+                          },
+                          "ItemInternalId": {
+                            "type": "string"
+                          },
+                          "Project": {
+                            "type": "string"
+                          },
+                          "ACTION_084": {
+                            "type": "string"
+                          },
+                          "START_DATE": {
+                            "type": "string"
+                          },
+                          "Month_Data": {
+                            "type": "string"
+                          },
+                          "Index": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "@@odata.etag",
+                          "ItemInternalId",
+                          "Project",
+                          "Filename",
+                          "START_DATE",
+                          "Month_Data",
+                          "Index"
+                        ]
+                      }
+                    }
+                  }
+                },
+                "ACTION_152": {
+                  "foreach": "@body('ACTION_133')",
+                  "actions": {
+                    "ACTION_243": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "source": "SOURCE_ID_001",
+                          "drive": "DRIVE_ID_001",
+                          "file": "FILE_ID_001",
+                          "table": "TABLE_ID_001",
+                          "idColumn": "Index",
+                          "id": "@items('ACTION_152')['Index']",
+                          "item/START_DATE": "@formatDateTime(parseDateTime(split(body('ACTION_222'), '.')[0]), 'MM/dd/yyyy', 'en-US')"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+                          "connectionName": "CONNECTION_NAME_004",
+                          "operationId": "PatchItem"
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "ACTION_207": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Foreach"
+                },
+                "ACTION_192": {
+                  "runAfter": {
+                    "ACTION_124": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "project_name",
+                    "value": "WS RS"
+                  }
+                },
+                "ACTION_124": {
+                  "runAfter": {
+                    "ACTION_152": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "IncrementVariable",
+                  "inputs": {
+                    "name": "linkcount",
+                    "value": 1
+                  }
+                },
+                "ACTION_207": {
+                  "actions": {
+                    "ACTION_073": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "path": "@outputs('ACTION_122')?['body/Path']",
+                          "type": "View",
+                          "dataset_02": "Anonymous"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness",
+                          "connectionName": "CONNECTION_NAME_001",
+                          "operationId": "CreateShareLinkByPathV2"
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    },
+                    "ACTION_012": {
+                      "runAfter": {
+                        "ACTION_073": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "AppendToStringVariable",
+                      "inputs": {
+                        "name": "link",
+                        "value": "<p>REPORT_CONTENT</p>"
+                      }
+                    },
+                    "ACTION_019": {
+                      "runAfter": {
+                        "ACTION_012": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "AppendToArrayVariable",
+                      "inputs": {
+                        "name": "arrayAttachment",
+                        "value": {
+                          "Name": "@outputs('ACTION_122')?['body/Name']",
+                          "Link": "@outputs('ACTION_073')?['body/WebUrl']"
+                        }
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "ACTION_133": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Scope"
+                }
+              },
+              "runAfter": {
+                "ACTION_151": [
+                  "Succeeded"
+                ]
+              },
+              "else": {
+                "actions": {}
+              },
+              "expression": {
+                "equals": [
+                  "@outputs('ACTION_115')",
+                  "RETAIL SALES DATABOOK"
+                ]
+              },
+              "type": "If"
+            },
+            "ACTION_021": {
+              "runAfter": {
+                "ACTION_162": [
+                  "Succeeded"
+                ]
+              },
+              "type": "AppendToStringVariable",
+              "inputs": {
+                "name": "task_name",
+                "value": "@{outputs('ACTION_115')},"
+              }
+            },
+            "ACTION_042": {
+              "actions": {
+                "ACTION_190": {
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "project_name",
+                    "value": "Report"
+                  }
+                }
+              },
+              "runAfter": {
+                "ACTION_196": [
+                  "Succeeded"
+                ]
+              },
+              "else": {
+                "actions": {}
+              },
+              "expression": {
+                "and": [
+                  {
+                    "greater": [
+                      "@variables('ACTION_270')",
+                      1
+                    ]
+                  },
+                  {
+                    "equals": [
+                      "@outputs('ACTION_186')",
+                      "Report"
+                    ]
+                  }
+                ]
+              },
+              "type": "If"
+            },
+            "ACTION_041": {
+              "actions": {
+                "ACTION_187": {
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "project_name",
+                    "value": "Export Import Assembly"
+                  }
+                }
+              },
+              "runAfter": {
+                "ACTION_185": [
+                  "Succeeded"
+                ]
+              },
+              "else": {
+                "actions": {}
+              },
+              "expression": {
+                "and": [
+                  {
+                    "greater": [
+                      "@variables('ACTION_270')",
+                      0
+                    ]
+                  },
+                  {
+                    "equals": [
+                      "@outputs('ACTION_186')",
+                      "Production, Export, Import"
+                    ]
+                  }
+                ]
+              },
+              "type": "If"
+            },
+            "ACTION_043": {
+              "actions": {
+                "ACTION_189": {
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "project_name",
+                    "value": "Price"
+                  }
+                }
+              },
+              "runAfter": {
+                "ACTION_184": [
+                  "Succeeded"
+                ]
+              },
+              "else": {
+                "actions": {}
+              },
+              "expression": {
+                "and": [
+                  {
+                    "greater": [
+                      "@variables('ACTION_270')",
+                      0
+                    ]
+                  },
+                  {
+                    "startsWith": [
+                      "@outputs('ACTION_186')",
+                      "PRICE"
+                    ]
+                  }
+                ]
+              },
+              "type": "If"
+            },
+            "ACTION_162": {
+              "runAfter": {
+                "ACTION_114": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Compose",
+              "inputs": "@split(outputs('ACTION_122')?['body/Path'], '/')[3]",
+              "description": "Example Output : SINAR SURI"
+            }
+          },
+          "runAfter": {
+            "ACTION_221": [
+              "Succeeded"
+            ]
+          },
+          "type": "Foreach",
+          "runtimeConfiguration": {
+            "concurrency": {
+              "repetitions": 50
+            }
+          }
+        },
+        "ACTION_077": {
+          "runAfter": {},
+          "type": "Expression",
+          "kind": "CurrentTime",
+          "inputs": {}
+        },
+        "ACTION_222": {
+          "runAfter": {
+            "ACTION_077": [
+              "Succeeded"
+            ]
+          },
+          "type": "Expression",
+          "kind": "ConvertTimeZone",
+          "inputs": {
+            "baseTime": "@body('ACTION_077')",
+            "sourceTimeZone": "UTC",
+            "destinationTimeZone": "SE Asia Standard Time",
+            "formatString": "d"
+          }
+        },
+        "ACTION_225": {
+          "runAfter": {
+            "ACTION_048": [
+              "Succeeded"
+            ]
+          },
+          "type": "Expression",
+          "kind": "SubtractFromTime",
+          "inputs": {
+            "baseTime": "@body('ACTION_077')",
+            "interval": 1,
+            "timeUnit": "Month"
+          }
+        },
+        "ACTION_048": {
+          "runAfter": {
+            "ACTION_222": [
+              "Succeeded"
+            ]
+          },
+          "type": "Compose",
+          "inputs": "@startOfMonth(body('ACTION_077'))"
+        },
+        "ACTION_193": {
+          "runAfter": {
+            "ACTION_025": [
+              "Succeeded"
+            ]
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "source": "SOURCE_ID_001",
+              "drive": "DRIVE_ID_001",
+              "file": "FILE_ID_001",
+              "scriptSource": "SOURCE_ID_001",
+              "scriptDrive": "DRIVE_ID_001",
+              "scriptId": "SCRIPT_ID_001"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+              "connectionName": "CONNECTION_NAME_004",
+              "operationId": "RunScriptProdV2"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "ACTION_268": {
+          "runAfter": {
+            "ACTION_225": [
+              "Succeeded"
+            ]
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "arrayAttachment",
+                "type": "array"
+              }
+            ]
+          }
+        },
+        "ACTION_269": {
+          "runAfter": {
+            "ACTION_268": [
+              "Succeeded"
+            ]
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "link",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "ACTION_270": {
+          "runAfter": {
+            "ACTION_269": [
+              "Succeeded"
+            ]
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "linkcount",
+                "type": "integer",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "ACTION_131": {
+          "runAfter": {
+            "ACTION_270": [
+              "Succeeded"
+            ]
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "task_name",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "ACTION_084": {
+          "runAfter": {
+            "ACTION_131": [
+              "Succeeded"
+            ]
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "filename",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "ACTION_221": {
+          "runAfter": {
+            "ACTION_084": [
+              "Succeeded"
+            ]
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "project_name",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "ACTION_167": {
+          "actions": {
+            "ACTION_231": {
+              "actions": {
+                "ACTION_176": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "poster": "User",
+                      "location": "LOCATION_001",
+                      "body/recipient/groupId": "GROUP_ID_001",
+                      "body/recipient/channelId": "CHANNEL_ID_002",
+                      "body/messageBody": "<p>REPORT_CONTENT</p>",
+                      "body/subject": "Data @{outputs('ACTION_229')}"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
+                      "connectionName": "CONNECTION_NAME_005",
+                      "operationId": "PostMessageToConversation"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                }
+              },
+              "runAfter": {
+                "ACTION_161": [
+                  "Succeeded"
+                ]
+              },
+              "else": {
+                "actions": {
+                  "ACTION_039": {
+                    "actions": {
+                      "ACTION_177": {
+                        "type": "OpenApiConnection",
+                        "inputs": {
+                          "parameters": {
+                            "poster": "User",
+                            "location": "LOCATION_001",
+                            "body/recipient/groupId": "GROUP_ID_001",
+                            "body/recipient/channelId": "CHANNEL_ID_002",
+                            "body/messageBody": "<p>REPORT_CONTENT</p>",
+                            "body/subject": "Data @{outputs('ACTION_229')}"
+                          },
+                          "host": {
+                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
+                            "connectionName": "CONNECTION_NAME_005",
+                            "operationId": "PostMessageToConversation"
+                          },
+                          "authentication": "@parameters('$authentication')"
+                        }
+                      }
+                    },
+                    "else": {
+                      "actions": {}
+                    },
+                    "expression": {
+                      "contains": [
+                        "@outputs('ACTION_229')",
+                        "COMPANY_NAME WORLD"
+                      ]
+                    },
+                    "type": "If"
+                  }
+                }
+              },
+              "expression": {
+                "and": [
+                  {
+                    "contains": [
+                      "@outputs('ACTION_161')",
+                      "Polreg"
+                    ]
+                  },
+                  {
+                    "not": {
+                      "contains": [
+                        "@outputs('ACTION_229')",
+                        "COMPANY_NAME WORLD"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "type": "If"
+            },
+            "ACTION_232": {
+              "actions": {
+                "ACTION_178": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "poster": "User",
+                      "location": "LOCATION_001",
+                      "body/recipient/groupId": "GROUP_ID_001",
+                      "body/recipient/channelId": "CHANNEL_ID_003",
+                      "body/messageBody": "<p>REPORT_CONTENT</p>",
+                      "body/subject": "Data @{outputs('ACTION_229')}"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
+                      "connectionName": "CONNECTION_NAME_005",
+                      "operationId": "PostMessageToConversation"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                }
+              },
+              "runAfter": {
+                "ACTION_161": [
+                  "Succeeded"
+                ]
+              },
+              "else": {
+                "actions": {}
+              },
+              "expression": {
+                "contains": [
+                  "@outputs('ACTION_161')",
+                  "Price"
+                ]
+              },
+              "type": "If"
+            },
+            "ACTION_230": {
+              "actions": {
+                "ACTION_175": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "poster": "User",
+                      "location": "LOCATION_001",
+                      "body/recipient/groupId": "GROUP_ID_001",
+                      "body/recipient/channelId": "CHANNEL_ID_004",
+                      "body/messageBody": "<p>REPORT_CONTENT</p>",
+                      "body/subject": "Data @{outputs('ACTION_229')}"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
+                      "connectionName": "CONNECTION_NAME_005",
+                      "operationId": "PostMessageToConversation"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                }
+              },
+              "runAfter": {
+                "ACTION_161": [
+                  "Succeeded"
+                ]
+              },
+              "else": {
+                "actions": {}
+              },
+              "expression": {
+                "contains": [
+                  "@outputs('ACTION_161')",
+                  "Export Import Assembly"
+                ]
+              },
+              "type": "If"
+            },
+            "ACTION_233": {
+              "actions": {
+                "ACTION_180": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "poster": "User",
+                      "location": "LOCATION_001",
+                      "body/recipient/groupId": "GROUP_ID_001",
+                      "body/recipient/channelId": "CHANNEL_ID_001",
+                      "body/messageBody": "<p>REPORT_CONTENT</p>",
+                      "body/subject": "Data @{outputs('ACTION_161')} - @{outputs('ACTION_229')}"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
+                      "connectionName": "CONNECTION_NAME_005",
+                      "operationId": "PostMessageToConversation"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                }
+              },
+              "runAfter": {
+                "ACTION_161": [
+                  "Succeeded"
+                ]
+              },
+              "else": {
+                "actions": {
+                  "ACTION_040": {
+                    "actions": {
+                      "ACTION_182": {
+                        "type": "OpenApiConnection",
+                        "inputs": {
+                          "parameters": {
+                            "poster": "User",
+                            "location": "LOCATION_001",
+                            "body/recipient/groupId": "GROUP_ID_001",
+                            "body/recipient/channelId": "CHANNEL_ID_001",
+                            "body/messageBody": "<p>REPORT_CONTENT</p>",
+                            "body/subject": "Data WS RS Competitor"
+                          },
+                          "host": {
+                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
+                            "connectionName": "CONNECTION_NAME_005",
+                            "operationId": "PostMessageToConversation"
+                          },
+                          "authentication": "@parameters('$authentication')"
+                        }
+                      }
+                    },
+                    "else": {
+                      "actions": {}
+                    },
+                    "expression": {
+                      "equals": [
+                        "@outputs('ACTION_161')",
+                        "WS RS Competitor"
+                      ]
+                    },
+                    "type": "If"
+                  }
+                }
+              },
+              "expression": {
+                "and": [
+                  {
+                    "contains": [
+                      "@outputs('ACTION_161')",
+                      "WS RS"
+                    ]
+                  },
+                  {
+                    "contains": [
+                      "@outputs('ACTION_229')",
+                      "SALES DATABOOK"
+                    ]
+                  }
+                ]
+              },
+              "type": "If"
+            },
+            "ACTION_234": {
+              "type": "Expression",
+              "kind": "CurrentTime",
+              "inputs": {}
+            },
+            "ACTION_220": {
+              "runAfter": {
+                "ACTION_161": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Compose",
+              "inputs": "@join(union(split(variables('task_name'), ','), split(variables('task_name'), ',')), ',')"
+            },
+            "ACTION_219": {
+              "actions": {
+                "ACTION_044": {
+                  "actions": {
+                    "ACTION_218": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "poster": "User",
+                          "location": "LOCATION_002",
+                          "body/recipient": "19:98d8e63c10e54e3586b535b8a275341c@thread.v2",
+                          "body/messageBody": "<p>REPORT_CONTENT</p>"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
+                          "connectionName": "CONNECTION_NAME_005",
+                          "operationId": "PostMessageToConversation"
+                        },
+                        "authentication": "@parameters('$authentication')"
+                      }
+                    }
+                  },
+                  "else": {
+                    "actions": {}
+                  },
+                  "expression": {
+                    "greater": [
+                      "@variables('ACTION_270')",
+                      1
+                    ]
+                  },
+                  "type": "If"
+                }
+              },
+              "runAfter": {
+                "ACTION_220": [
+                  "Succeeded"
+                ]
+              },
+              "else": {
+                "actions": {
+                  "ACTION_045": {
+                    "actions": {
+                      "ACTION_215": {
+                        "type": "OpenApiConnection",
+                        "inputs": {
+                          "parameters": {
+                            "emailMessage/To": "user_003@example.com;user_004@example.com",
+                            "emailMessage/Subject": "Mohon Bantuan Data COMPANY_NAME COMPANY_NAME COMPANY_NAME",
+                            "emailMessage/Body": "<p>REPORT_CONTENT</p>",
+                            "emailMessage/From": "user_002@example.com",
+                            "emailMessage/Cc": "user_005@example.com;user_001@example.com;user_006@example.com",
+                            "emailMessage/Importance": "High"
+                          },
+                          "host": {
+                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+                            "connectionName": "CONNECTION_NAME_006",
+                            "operationId": "SendEmailV2"
+                          },
+                          "authentication": "@parameters('$authentication')"
+                        }
+                      },
+                      "ACTION_183": {
+                        "runAfter": {
+                          "ACTION_215": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "OpenApiConnection",
+                        "inputs": {
+                          "parameters": {
+                            "poster": "Flow bot",
+                            "location": "LOCATION_002",
+                            "body/recipient": "19:432b58e57f034849b67ad1acaa9041c5@thread.v2",
+                            "body/messageBody": "<p>REPORT_CONTENT</p>"
+                          },
+                          "host": {
+                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_teams",
+                            "connectionName": "CONNECTION_NAME_005",
+                            "operationId": "PostMessageToConversation"
+                          },
+                          "authentication": "@parameters('$authentication')"
+                        }
+                      }
+                    },
+                    "else": {
+                      "actions": {}
+                    },
+                    "expression": {
+                      "and": [
+                        {
+                          "greater": [
+                            "@variables('ACTION_270')",
+                            1
+                          ]
+                        },
+                        {
+                          "contains": [
+                            "@variables('task_name')",
+                            "Report COMPANY_NAME"
+                          ]
+                        }
+                      ]
+                    },
+                    "type": "If"
+                  }
+                }
+              },
+              "expression": {
+                "startsWith": [
+                  "@outputs('ACTION_220')",
+                  "WS RS Team PR"
+                ]
+              },
+              "type": "If"
+            },
+            "ACTION_161": {
+              "runAfter": {
+                "ACTION_229": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Compose",
+              "inputs": "@variables('project_name')"
+            },
+            "ACTION_229": {
+              "runAfter": {
+                "ACTION_234": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Compose",
+              "inputs": "@replace(join(union(split(variables('task_name'), ','), split(variables('task_name'), ',')), ','),',','')"
+            }
+          },
+          "runAfter": {
+            "ACTION_025": [
+              "Succeeded"
+            ]
+          },
+          "type": "Scope"
+        }
+      }
+    },
+    "connectionReferences": {
+      "shared_onedriveforbusiness": {
+        "connectionName": "CONNECTION_NAME_007",
+        "source": "SOURCE_ID_002",
+        "id": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness",
+        "tier": "NotSpecified",
+        "apiName": "onedriveforbusiness",
+        "isProcessSimpleApiReferenceConversionAlreadyDone": false
+      },
+      "shared_excelonlinebusiness_1": {
+        "connectionName": "CONNECTION_NAME_008",
+        "source": "SOURCE_ID_002",
+        "id": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+        "tier": "NotSpecified",
+        "apiName": "excelonlinebusiness",
+        "isProcessSimpleApiReferenceConversionAlreadyDone": false
+      },
+      "shared_approvals": {
+        "connectionName": "CONNECTION_NAME_009",
+        "source": "SOURCE_ID_002",
+        "id": "/providers/Microsoft.PowerApps/apis/shared_approvals",
+        "tier": "NotSpecified",
+        "apiName": "approvals",
+        "isProcessSimpleApiReferenceConversionAlreadyDone": false
+      },
+      "shared_excelonlinebusiness-1": {
+        "connectionName": "CONNECTION_NAME_010",
+        "source": "SOURCE_ID_002",
+        "id": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness",
+        "tier": "NotSpecified",
+        "apiName": "excelonlinebusiness",
+        "isProcessSimpleApiReferenceConversionAlreadyDone": false
+      },
+      "shared_teams_1": {
+        "connectionName": "CONNECTION_NAME_011",
+        "source": "SOURCE_ID_002",
+        "id": "/providers/Microsoft.PowerApps/apis/shared_teams",
+        "tier": "NotSpecified",
+        "apiName": "teams",
+        "isProcessSimpleApiReferenceConversionAlreadyDone": false
+      },
+      "shared_office365": {
+        "connectionName": "CONNECTION_NAME_012",
+        "source": "SOURCE_ID_002",
+        "id": "/providers/Microsoft.PowerApps/apis/shared_office365",
+        "tier": "NotSpecified",
+        "apiName": "office365",
+        "isProcessSimpleApiReferenceConversionAlreadyDone": false
+      }
+    },
+    "flowFailureAlertSubscribed": false,
+    "isManaged": false
+  }
+}

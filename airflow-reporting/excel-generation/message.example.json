@@ -1,0 +1,10 @@
+{
+  "Report_type": "excel_table",
+  "Table": "example-project.tmp.synthetic_rows",
+  "Filter": "1=1",
+  "Format": "xlsx",
+  "Target_filename": "example_workbook",
+  "Target_bucket": "example-output-bucket",
+  "Target_folder": "examples/",
+  "Client_Project_Id": "example-project"
+}

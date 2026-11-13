@@ -1,0 +1,11 @@
+flowchart LR
+    S0["Poll readiness: upstream success table"]
+    S1["Run report SQL: eight task groups"]
+    S2["Export CSV files: Cloud Storage / shards"]
+    S3["Join and checksum: SHA-1 file manifest"]
+    S4["Finish the DAG: output file set"]
+    S0 --> S1 --> S2 --> S3 --> S4
+    B0["Not ready: retry; timeout raises"]
+    B1["Task failure: Pub/Sub and email"]
+    S0 -. condition .-> B0
+    S2 -. source note .-> B1

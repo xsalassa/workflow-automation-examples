@@ -1,0 +1,63 @@
+{
+  "env": {
+    "project_id": "example-project",
+    "ssh_conn_id": "example_ssh",
+    "gcs_bucket": "example-report-bucket",
+    "gcs_folder": "REPORTS",
+    "bq_ops_table": "job_status",
+    "bq_ops_dataset": "ops",
+    "bq_dw_dataset": "dw",
+    "bq_tmp_dataset": "tmp",
+    "aws_conn_id": "example_aws",
+    "s3_bucket": "example-partner-bucket",
+    "gen_rpt_table": "report_requests",
+    "gen_pubsub_topic": "report_requests",
+    "source_dataset": "source_demo",
+    "source_tables": {
+      "display_capacity": "source_display_capacity",
+      "products": "source_products",
+      "store_warehouses": "source_store_warehouses",
+      "stores": "source_stores",
+      "product_assignments": "source_product_assignments",
+      "monthly_product_status": "source_monthly_product_status",
+      "product_status_as_of": "fn_product_status_as_of",
+      "branch_hierarchy": "source_branch_hierarchy",
+      "product_conversions": "source_product_conversions",
+      "product_recipes": "source_product_recipes",
+      "product_bundles": "source_product_bundles",
+      "component_movements": "source_component_movements",
+      "channel_transactions": "source_channel_transactions",
+      "replenishments": "source_replenishments",
+      "sales_lines": "source_sales_lines",
+      "distribution_centers": "source_distribution_centers"
+    },
+    "target_tables": {
+      "dataset_01": "generated_dataset_01",
+      "dataset_02": "generated_dataset_02",
+      "dataset_03": "generated_dataset_03",
+      "dataset_04": "generated_dataset_04",
+      "dataset_05": "generated_dataset_05",
+      "dataset_06": "generated_dataset_06",
+      "dataset_07": "generated_dataset_07",
+      "dataset_08": "generated_dataset_08"
+    }
+  },
+  "pubsub": {
+    "pubsub_project_id": "example-project",
+    "topic": "workflow_failures",
+    "message_length": 256
+  },
+  "dag": {
+    "job_name": "report_generation",
+    "owner": "example-team",
+    "email": [
+      "owner@example.com"
+    ],
+    "tags": [
+      "example-team",
+      "reporting"
+    ],
+    "schedule": null,
+    "start_date": "2025-11-24"
+  }
+}

@@ -1,0 +1,584 @@
+<!doctype html>
+<html>
+  <head>
+    <base target="_blank">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      :root {
+        --blue: #174ea6;
+        --blue-soft: #e8f0fe;
+        --green: #188038;
+        --green-soft: #e6f4ea;
+        --amber: #b06000;
+        --amber-soft: #fef7e0;
+        --red: #b3261e;
+        --red-soft: #fce8e6;
+        --ink: #202124;
+        --muted: #5f6368;
+        --line: #dadce0;
+        --surface: #f8f9fa;
+      }
+      * { box-sizing: border-box; }
+      body {
+        background: #fff;
+        color: var(--ink);
+        font: 13px/1.5 Arial, sans-serif;
+        margin: 0;
+      }
+      header {
+        background: linear-gradient(135deg, #174ea6, #1a73e8);
+        color: #fff;
+        padding: 18px 16px 16px;
+      }
+      header h1 { font-size: 18px; margin: 0 0 4px; }
+      header p { margin: 0; opacity: .9; }
+      main { padding: 14px; }
+      .loading { color: var(--muted); padding: 18px 0; text-align: center; }
+      .card {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        margin-bottom: 12px;
+        overflow: hidden;
+      }
+      .card-body { padding: 12px; }
+      .card-title {
+        font-size: 13px;
+        font-weight: 700;
+        margin: 0 0 8px;
+      }
+      .eyebrow {
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+      }
+      .live-title {
+        align-items: center;
+        display: flex;
+        gap: 7px;
+        margin: 3px 0 10px;
+      }
+      .live-title strong { font-size: 17px; }
+      .badge {
+        border-radius: 999px;
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 3px 7px;
+      }
+      .badge.live { background: var(--green-soft); color: var(--green); }
+      .badge.weekday { background: var(--blue-soft); color: var(--blue); }
+      .badge.nonworking { background: var(--amber-soft); color: var(--amber); }
+      .status {
+        border-radius: 7px;
+        margin-top: 9px;
+        padding: 8px 9px;
+      }
+      .status.ready { background: var(--green-soft); color: var(--green); }
+      .status.warning { background: var(--amber-soft); color: var(--amber); }
+      .status.error { background: var(--red-soft); color: var(--red); }
+      .facts {
+        display: grid;
+        gap: 8px;
+        grid-template-columns: 1fr 1fr;
+      }
+      .fact {
+        background: var(--surface);
+        border-radius: 7px;
+        min-height: 58px;
+        padding: 8px;
+      }
+      .fact span {
+        color: var(--muted);
+        display: block;
+        font-size: 10px;
+        margin-bottom: 3px;
+        text-transform: uppercase;
+      }
+      .fact strong { overflow-wrap: anywhere; }
+      .file-link {
+        color: var(--blue);
+        display: inline-block;
+        font-weight: 700;
+        margin-top: 5px;
+        overflow-wrap: anywhere;
+      }
+      .tabs {
+        display: flex;
+        gap: 6px;
+        margin: 0 0 12px;
+        overflow-x: auto;
+        padding-bottom: 2px;
+      }
+      .tab {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--muted);
+        cursor: pointer;
+        flex: 0 0 auto;
+        font-size: 11px;
+        padding: 6px 10px;
+      }
+      .tab.active {
+        background: var(--blue);
+        border-color: var(--blue);
+        color: #fff;
+      }
+      .profile-head {
+        background: var(--blue-soft);
+        border-radius: 8px;
+        margin-bottom: 10px;
+        padding: 10px;
+      }
+      .profile-head h2 { color: var(--blue); font-size: 15px; margin: 0 0 3px; }
+      .profile-head p { margin: 0; }
+      .timeline { list-style: none; margin: 0; padding: 0; }
+      .timeline li {
+        border-left: 2px solid #d2e3fc;
+        margin-left: 5px;
+        padding: 0 0 12px 14px;
+        position: relative;
+      }
+      .timeline li:last-child { padding-bottom: 0; }
+      .timeline li::before {
+        background: var(--blue);
+        border: 2px solid #fff;
+        border-radius: 50%;
+        box-shadow: 0 0 0 1px #aecbfa;
+        content: "";
+        height: 8px;
+        left: -6px;
+        position: absolute;
+        top: 4px;
+        width: 8px;
+      }
+      .timeline time {
+        color: var(--blue);
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .timeline strong { display: block; }
+      .timeline small { color: var(--muted); display: block; }
+      .split {
+        display: grid;
+        gap: 9px;
+        grid-template-columns: 1fr 1fr;
+      }
+      .task-box {
+        background: var(--surface);
+        border-radius: 8px;
+        padding: 9px;
+      }
+      .task-box.auto { border-top: 3px solid var(--green); }
+      .task-box.manual { border-top: 3px solid var(--amber); }
+      .task-box h3 { font-size: 12px; margin: 0 0 6px; }
+      .task-box ul, .plain-list { margin: 0; padding-left: 17px; }
+      .task-box li, .plain-list li { margin-bottom: 4px; }
+      details {
+        border-top: 1px solid var(--line);
+        padding: 0 12px;
+      }
+      details:first-of-type { border-top: 0; }
+      summary {
+        cursor: pointer;
+        font-weight: 700;
+        padding: 11px 0;
+      }
+      details > div { color: var(--muted); padding: 0 0 12px; }
+      .status-grid {
+        display: grid;
+        gap: 6px;
+        grid-template-columns: 1fr 1fr;
+      }
+      .status-item {
+        background: var(--surface);
+        border-radius: 6px;
+        padding: 7px;
+      }
+      .status-item strong { display: block; font-size: 11px; }
+      .checklist { list-style: none; margin: 0; padding: 0; }
+      .checklist li {
+        align-items: flex-start;
+        display: flex;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .checklist input { margin-top: 3px; }
+      .note {
+        background: var(--amber-soft);
+        border-left: 3px solid #f9ab00;
+        border-radius: 4px;
+        color: #6f4700;
+        margin-top: 9px;
+        padding: 8px;
+      }
+      .error-panel {
+        background: var(--red-soft);
+        border-radius: 8px;
+        color: var(--red);
+        padding: 12px;
+      }
+      footer {
+        color: var(--muted);
+        font-size: 10px;
+        padding: 2px 14px 16px;
+        text-align: center;
+      }
+      [hidden] { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Panduan PIC Monitoring</h1>
+      <p>Konteks hari ini, timeline, dan checklist operasional.</p>
+    </header>
+    <main>
+      <div id="loading" class="loading">Memuat informasi monitoring...</div>
+      <div id="error" class="error-panel" hidden></div>
+      <div id="content" hidden>
+        <section class="card">
+          <div class="card-body">
+            <div class="eyebrow">Konteks live</div>
+            <div class="live-title">
+              <strong id="liveDate">-</strong>
+              <span class="badge live">LIVE</span>
+              <span id="dayBadge" class="badge weekday">-</span>
+            </div>
+            <div class="facts">
+              <div class="fact">
+                <span>Monitoring 1</span>
+                <strong id="monitoring1">-</strong>
+              </div>
+              <div class="fact">
+                <span>Monitoring 2</span>
+                <strong id="monitoring2">-</strong>
+              </div>
+              <div class="fact">
+                <span>Sumber PIC</span>
+                <strong id="sourceDate">-</strong>
+              </div>
+              <div class="fact">
+                <span>DCP</span>
+                <strong id="dcpTimes">-</strong>
+              </div>
+            </div>
+            <div id="fileStatus" class="status warning"></div>
+            <a id="fileLink" class="file-link" hidden>Buka daily file</a>
+            <div id="holidayWarning" class="note" hidden></div>
+          </div>
+        </section>
+
+        <div class="eyebrow" style="margin-bottom:7px">Pelajari jenis hari</div>
+        <nav id="profileTabs" class="tabs"></nav>
+
+        <section class="card">
+          <div class="card-body">
+            <div class="profile-head">
+              <h2 id="profileTitle">-</h2>
+              <p id="profileDescription">-</p>
+            </div>
+            <h3 class="card-title">Timeline monitoring</h3>
+            <ol id="timeline" class="timeline"></ol>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-body">
+            <h3 class="card-title">Otomatis vs tugas PIC</h3>
+            <div class="split">
+              <div class="task-box auto">
+                <h3>Otomatis</h3>
+                <ul id="automaticTasks"></ul>
+              </div>
+              <div class="task-box manual">
+                <h3>PIC</h3>
+                <ul id="manualTasks"></ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-body">
+            <h3 class="card-title">Checklist sebelum selesai</h3>
+            <ul class="checklist">
+              <li><input type="checkbox"><span>Pastikan tanggal, PIC, dan DAY TYPE benar.</span></li>
+              <li><input type="checkbox"><span>Periksa hasil automation dan Notes.</span></li>
+              <li><input type="checkbox"><span>Jalankan Airflow pada semua window aktif.</span></li>
+              <li><input type="checkbox"><span>Isi Start Time, End Time, status, dan evidence manual.</span></li>
+              <li><input type="checkbox"><span>Review lalu Copy Summary sebelum dikirim.</span></li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="card">
+          <details>
+            <summary>Apa yang berubah di daily file?</summary>
+            <div id="dailyStructure"></div>
+          </details>
+          <details>
+            <summary>Arti status monitoring</summary>
+            <div class="status-grid">
+              <div class="status-item"><strong>OK</strong>Proses selesai sesuai hasil.</div>
+              <div class="status-item"><strong>RUNNING</strong>Proses masih berjalan.</div>
+              <div class="status-item"><strong>FAILED</strong>Perlu cek Notes/evidence.</div>
+              <div class="status-item"><strong>NO SCHEDULE</strong>Tidak dijadwalkan pada tanggal target.</div>
+              <div class="status-item"><strong>NOT FOUND</strong>Run atau file belum ditemukan.</div>
+              <div class="status-item"><strong>SKIPPED</strong>Tidak berlaku untuk jenis hari tersebut.</div>
+            </div>
+          </details>
+          <details>
+            <summary>Jika ada masalah</summary>
+            <div>
+              <ul class="plain-list">
+                <li>Daily file belum ada: gunakan Create Daily atau hubungi admin.</li>
+                <li>PIC/day type salah: jangan ubah formula; cek Schedule dan Holiday.</li>
+                <li>Window Airflow tidak muncul: pastikan profil hari yang aktif benar.</li>
+                <li>Daily file sudah ada: sistem tidak menimpa input dan mengembalikan ALREADY_EXISTS.</li>
+                <li>Ada popup Holiday: daily file existing tidak berubah otomatis; eskalasi ke admin.</li>
+              </ul>
+            </div>
+          </details>
+          <details>
+            <summary>Catatan untuk admin</summary>
+            <div>
+              Generate Schedule setelah perubahan roster, Validate Template sebelum
+              aktivasi, dan Setup All Triggers hanya dari akun owner automation.
+              Hindari trigger time-based dengan beberapa owner.
+            </div>
+          </details>
+        </section>
+      </div>
+    </main>
+    <footer id="generatedAt"></footer>
+
+    <script>
+      const PROFILES = {
+        "Weekday": {
+          title: "Weekday",
+          description: "Dua PIC mengikuti rotasi normal pada Schedule.",
+          dcpAutomation: "07:00",
+          dcpChecking: "08:00",
+          airflow: ["09:00", "11:00", "14:00", "17:00"],
+          looker1600: "Berjalan",
+          structure: [
+            "Menggunakan Ops Checkpoint weekday.",
+            "DCP lengkap termasuk Check Refresh Semantic Power BI.",
+            "Sheet Refresh Semantic Power BI dipertahankan.",
+            "Summary tersedia pada 09:00, 11:00, 14:00, dan 17:00."
+          ]
+        },
+        "Weekend": {
+          title: "Weekend",
+          description: "Kedua peran memakai Monitoring 1 dari weekday berikutnya.",
+          dcpAutomation: "08:00",
+          dcpChecking: "09:00",
+          airflow: ["09:00", "13:30", "17:00"],
+          looker1600: "SKIPPED_NOT_APPLICABLE",
+          structure: [
+            "Ops Checkpoint Weekend menjadi Ops Checkpoint aktif.",
+            "Task DCP Check Refresh Semantic Power BI dihapus.",
+            "Sheet Refresh Semantic Power BI dihapus.",
+            "Summary tersedia pada 09:00, 13:30, dan 17:00.",
+            "H15/I15 yang FAILED adalah expected failure; review detailnya."
+          ]
+        },
+        "Holiday": {
+          title: "Hari Libur Nasional",
+          description: "Tetap dimonitor dengan profil non-working dan PIC weekday berikutnya.",
+          dcpAutomation: "08:00",
+          dcpChecking: "09:00",
+          airflow: ["09:00", "13:30", "17:00"],
+          looker1600: "SKIPPED_NOT_APPLICABLE",
+          structure: [
+            "Menggunakan struktur Ops Checkpoint Weekend.",
+            "Task dan sheet Semantic Power BI dihapus.",
+            "DAY TYPE menampilkan PUBLIC HOLIDAY.",
+            "Daily file tetap dibuat untuk tanggal libur."
+          ]
+        },
+        "Long Holiday": {
+          title: "Long Holiday",
+          description: "Minimal tiga hari non-working berurutan; setiap tanggal tetap memiliki daily file.",
+          dcpAutomation: "08:00",
+          dcpChecking: "09:00",
+          airflow: ["09:00", "13:30", "17:00"],
+          looker1600: "SKIPPED_NOT_APPLICABLE",
+          structure: [
+            "Setiap tanggal rangkaian memiliki file dan monitoring sendiri.",
+            "PIC setiap tanggal mengikuti Monitoring 1 weekday berikutnya.",
+            "Menggunakan checklist dan Summary non-working.",
+            "Tidak ada rekap ulang rangkaian libur pada hari kerja berikutnya."
+          ]
+        }
+      };
+
+      let liveState = null;
+      let selectedProfile = "Weekday";
+
+      function loadGuide() {
+        google.script.run
+          .withSuccessHandler(renderGuide)
+          .withFailureHandler(renderError)
+          .getPicGuideState();
+      }
+
+      function renderGuide(state) {
+        liveState = state;
+        selectedProfile = PROFILES[state.monitoringType]
+          ? state.monitoringType
+          : (state.isNonWorking ? "Weekend" : "Weekday");
+        document.getElementById("loading").hidden = true;
+        document.getElementById("content").hidden = false;
+        document.getElementById("liveDate").textContent =
+          state.dayName + ", " + state.dateKey;
+        const dayBadge = document.getElementById("dayBadge");
+        dayBadge.textContent = state.dayType;
+        dayBadge.className = "badge " +
+          (state.isNonWorking ? "nonworking" : "weekday");
+        document.getElementById("monitoring1").textContent =
+          state.monitoring1 || "-";
+        document.getElementById("monitoring2").textContent =
+          state.monitoring2 || "-";
+        document.getElementById("sourceDate").textContent =
+          state.assignmentSourceDate || "-";
+        document.getElementById("dcpTimes").textContent =
+          "Auto " + state.dcpAutomationTime +
+          " · Check " + state.dcpCheckingTime;
+        renderFileState(state);
+        renderTabs();
+        renderProfile(selectedProfile);
+        document.getElementById("generatedAt").textContent =
+          "Informasi diperbarui " + new Date(state.generatedAt).toLocaleString();
+      }
+
+      function renderFileState(state) {
+        const target = document.getElementById("fileStatus");
+        target.textContent = state.dailyFileMessage;
+        target.className = "status " +
+          (state.dailyFileStatus === "READY" ? "ready" :
+            state.dailyFileStatus === "UNAVAILABLE" ? "error" : "warning");
+        const link = document.getElementById("fileLink");
+        if (state.dailyFileUrl) {
+          link.hidden = false;
+          link.href = state.dailyFileUrl;
+          link.textContent = "Buka " +
+            (state.dailyFileName || "daily file");
+        } else {
+          link.hidden = true;
+        }
+        const warning = document.getElementById("holidayWarning");
+        if (state.pendingHolidayWarnings) {
+          warning.hidden = false;
+          warning.textContent =
+            "Ada " + state.pendingHolidayWarnings +
+            " perubahan Holiday yang perlu direview admin.";
+        } else {
+          warning.hidden = true;
+        }
+      }
+
+      function renderTabs() {
+        const target = document.getElementById("profileTabs");
+        target.replaceChildren();
+        Object.keys(PROFILES).forEach(function (name) {
+          const button = document.createElement("button");
+          button.className = "tab" +
+            (name === selectedProfile ? " active" : "");
+          button.textContent = name;
+          button.onclick = function () {
+            selectedProfile = name;
+            renderTabs();
+            renderProfile(name);
+          };
+          target.appendChild(button);
+        });
+      }
+
+      function renderProfile(name) {
+        const profile = PROFILES[name];
+        document.getElementById("profileTitle").textContent = profile.title;
+        document.getElementById("profileDescription").textContent =
+          profile.description;
+        renderTimeline(profile);
+        renderTaskSplit(profile);
+        const structure = document.getElementById("dailyStructure");
+        structure.replaceChildren();
+        const list = document.createElement("ul");
+        list.className = "plain-list";
+        profile.structure.forEach(function (item) {
+          const row = document.createElement("li");
+          row.textContent = item;
+          list.appendChild(row);
+        });
+        structure.appendChild(list);
+      }
+
+      function renderTimeline(profile) {
+        const items = [
+          ["Sebelum " + profile.dcpAutomation, "Daily file", "Dibuat automation; PIC memastikan file tersedia."],
+          [profile.dcpAutomation, "DCP automation", "Checking time pada sheet: " + profile.dcpChecking + "."],
+          ["09:00", "File Status", "Otomatis; Airflow 09:00 tetap dijalankan manual."],
+          [profile.airflow.slice(1).join(" · "), "Airflow Ops", "Jalankan manual sesuai tombol yang tersedia."],
+          ["14:00", "Looker early", "Berjalan otomatis pada semua jenis hari."],
+          ["16:00", "Looker afternoon", profile.looker1600 + "."],
+          ["Akhir shift", "Summary", "Review, copy, lalu kirim melalui kanal operasional."]
+        ];
+        const target = document.getElementById("timeline");
+        target.replaceChildren();
+        items.forEach(function (item) {
+          const row = document.createElement("li");
+          const time = document.createElement("time");
+          time.textContent = item[0];
+          const title = document.createElement("strong");
+          title.textContent = item[1];
+          const detail = document.createElement("small");
+          detail.textContent = item[2];
+          row.appendChild(time);
+          row.appendChild(title);
+          row.appendChild(detail);
+          target.appendChild(row);
+        });
+      }
+
+      function renderTaskSplit(profile) {
+        renderList("automaticTasks", [
+          "Menentukan day type dan PIC.",
+          "Mengisi tanggal, PIC, formula, dan Summary.",
+          "DCP " + profile.dcpAutomation + " dan File Status 09:00.",
+          "Looker 14:00; Looker 16:00: " + profile.looker1600 + "."
+        ]);
+        renderList("manualTasks", [
+          "Verifikasi B2, B3, dan DAY TYPE.",
+          "Jalankan Airflow: " + profile.airflow.join(", ") + ".",
+          "Isi checklist/evidence manual dan baca Notes.",
+          "Review serta kirim Summary."
+        ]);
+      }
+
+      function renderList(elementId, items) {
+        const target = document.getElementById(elementId);
+        target.replaceChildren();
+        items.forEach(function (item) {
+          const row = document.createElement("li");
+          row.textContent = item;
+          target.appendChild(row);
+        });
+      }
+
+      function renderError(error) {
+        document.getElementById("loading").hidden = true;
+        const target = document.getElementById("error");
+        target.hidden = false;
+        target.textContent =
+          "Panduan tidak dapat memuat konteks live: " +
+          String(error && error.message ? error.message : error);
+      }
+
+      loadGuide();
+    </script>
+  </body>
+</html>

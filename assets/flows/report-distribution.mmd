@@ -1,0 +1,11 @@
+flowchart LR
+    S0["New file arrives: OneDrive polling trigger"]
+    S1["Read and classify: metadata and category"]
+    S2["Route the report: branch-specific handling"]
+    S3["Update workbook: eligible row updates"]
+    S4["Notify recipients: Teams or email paths"]
+    S0 --> S1 --> S2 --> S3 --> S4
+    B0["Selected categories: request and await approval"]
+    B1["Other categories: direct update paths"]
+    S2 -. selected category .-> B0
+    S2 -. source note .-> B1

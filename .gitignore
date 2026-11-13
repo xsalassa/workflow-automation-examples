@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+demo/
+.env
+.env.*
+!.env.example
+*.pdf
+*.docx
+*:Zone.Identifier
+.DS_Store

@@ -1,0 +1,11 @@
+flowchart LR
+    S0["Read request rows: BigQuery metadata"]
+    S1["Publish requests: Pub/Sub messages"]
+    S2["Receive push: Cloud Run HTTP route"]
+    S3["Query and write XLSX: BigQuery / XlsxWriter"]
+    S4["Upload workbook: Cloud Storage output"]
+    S0 --> S1 -. externally configured push .-> S2 --> S3 --> S4
+    B0["Wait for file count: Airflow polls GCS"]
+    B1["Publish notifications: email and chat topics"]
+    S1 --> B0
+    B0 -->|object count ready| B1
