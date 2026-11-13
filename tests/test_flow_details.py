@@ -29,6 +29,16 @@ class FlowDetailsTests(unittest.TestCase):
         found=[n for s in scopes for n in s['nodes'] if n['id']=='Leaf'][0]
         self.assertEqual(found['detail'],leaf)
         self.assertEqual(sum(len(s['nodes']) for s in scopes),4)
+    def test_child_scope_contract_and_picker_id_match(self):
+        scopes=module.extract_scopes({'triggers':{},'actions':{'Branch':{
+            'type':'If','actions':{'Leaf':{'type':'Compose'}}}}})
+        ids={scope['id'] for scope in scopes}
+        for scope in scopes:
+            for node in scope['nodes']:
+                for child in node['children']:
+                    self.assertIn(child['scope'],ids)
+        self.assertIn("getElementById('scope')",module.SCRIPT)
+
     def test_invalid_cross_scope_dependency_fails(self):
         with self.assertRaises(ValueError):
             module.extract_scopes({'triggers':{},'actions':{'A':{'runAfter':{'missing':['Succeeded']}}}})
